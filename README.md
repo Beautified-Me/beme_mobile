@@ -1,2 +1,3 @@
-# beme_mobile
-Mobile application 
+# BeMe_mobile
+
+An Virtual Make up Application 
