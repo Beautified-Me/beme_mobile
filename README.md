@@ -21,7 +21,7 @@ tensorflow/tensorflow
 
 
 
-##References
+## References
 
 Lenses detect key facial points to show where the borders of the lips, eyes, nose, and face are. Then, ML engine builds a mask matching the face correctly even if you’re moving (for example, using openCV or any graphic library).
 
@@ -33,3 +33,11 @@ Implementation: mobile app
 References: Snapchat, Instagram
 Guides: Facial landmarks with dlib, OpenCV, and Python, Build a Simple Camera App (https://www.pyimagesearch.com/2017/04/03/facial-landmarks-dlib-opencv-python/)
 
+## Error Code Backend 
+
+|  Error Code |  Result                                                    |
+|-------------|------------------------------------------------------------|
+| 201         |  Accepted even Empty String                                |
+| 401         |  Bad Request usually Parameter didnt send properly         |
+| 403         |  Access Denied only permission                             |
+| 500         |  Server issue                                              |

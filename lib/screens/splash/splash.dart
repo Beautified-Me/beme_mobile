@@ -1,23 +1,25 @@
 import 'dart:async';
 
+import 'package:Utician/screens/login/index.dart';
 import 'package:Utician/screens/onboard/index.dart';
 import 'package:Utician/util/util.dart';
 import "package:flutter/material.dart";
 
+
 class Splash extends StatefulWidget {
+
   @override
   _SplashState createState() => _SplashState();
 }
 
 class _SplashState extends State<Splash> {
-  //Initialized state
   @override
   void initState() {
     super.initState();
     Timer(
         Duration(seconds: Util.bemeSplash),
-        () => Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (BuildContext context) => Onboarding())));
+        () => Navigator.of(context).pushReplacement(MaterialPageRoute(
+            builder: (BuildContext context) => Onboarding())));
   }
 
   @override
@@ -34,10 +36,12 @@ class _SplashState extends State<Splash> {
               children: <Widget>[
                 Container(margin: EdgeInsets.only(bottom: 5.0)),
                 title(),
-                subtitle(),   
+                subtitle(),
               ],
             )));
   }
+
+  
 
   Widget title() {
     return Row(
@@ -46,20 +50,20 @@ class _SplashState extends State<Splash> {
     );
   }
 
-  Widget subtitle() {  
+  Widget subtitle() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
-      children: <Widget>[
-        new Text(Util.appDescription, style: subtitleStyle)
-      ],);
+      children: <Widget>[new Text(Util.appDescription, style: subtitleStyle)],
+    );
   }
-
-
 
   // Styles
   var titleStyle = TextStyle(
       color: Colors.black, fontFamily: Util.BemeLogo, fontSize: Util.bemeSize);
 
-  var subtitleStyle = TextStyle(color: Colors.black, fontFamily:  Util.BemeRegular, fontSize: Util.bemeSubSize);
+  var subtitleStyle = TextStyle(
+      color: Colors.black,
+      fontFamily: Util.BemeRegular,
+      fontSize: Util.bemeSubSize);
 }

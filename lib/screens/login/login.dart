@@ -1,6 +1,9 @@
 import 'dart:async';
 
+import 'package:Utician/services/auth_service.dart';
+import 'package:Utician/services/http_service.dart';
 import 'package:Utician/util/app_version.dart';
+import 'package:Utician/util/custom_dialog.dart';
 import 'package:Utician/util/util.dart';
 import 'package:Utician/util/validator.dart';
 import 'package:Utician/widgets/email_textfield_icon/index.dart';
@@ -13,7 +16,10 @@ import 'package:connectivity/connectivity.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:android_intent/android_intent.dart';
-import 'package:flutter_auth_buttons/flutter_auth_buttons.dart';
+import 'package:flutter_facebook_login/flutter_facebook_login.dart';
+import 'package:flutter_signin_button/flutter_signin_button.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert' as JSON;
 
 class Login extends StatefulWidget {
   @override
@@ -29,23 +35,52 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
   final TextEditingController _email = new TextEditingController();
   final TextEditingController _password = new TextEditingController();
 
-
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+  final _formLoginKey = GlobalKey<FormState>();
+  final _formRegisterKey = GlobalKey<FormState>();
   var _connectionStatus = 'unknown';
   String _connections = '';
   Connectivity connectivity;
   StreamSubscription<ConnectivityResult> subscription;
   TabController _controller;
+  Map userProfile;
+  bool _isLoggedIn = true;
+  final facebookLogin = FacebookLogin();
 
   final AndroidIntent intent = new AndroidIntent(
       action: 'android.settings.ACTION_WIFI_SETTINGS',
       package: 'com.gis.beme',
       data: 'package:com.gis.beme');
 
+  _loginWithFB() async {
+    final result = await facebookLogin.logIn(['email', 'public_profile']);
+
+    switch (result.status) {
+      case FacebookLoginStatus.loggedIn:
+        final token = result.accessToken.token;
+        final graphResponse = await http.get(
+            'https://graph.facebook.com/v2.12/me?fields=name,picture,email&access_token=${token}');
+        final profile = JSON.jsonDecode(graphResponse.body);
+        print("what is profile" + profile);
+        setState(() {
+          userProfile = profile;
+          _isLoggedIn = true;
+          _email.text = userProfile['email'];
+        });
+        break;
+
+      case FacebookLoginStatus.cancelledByUser:
+        setState(() => _isLoggedIn = false);
+        break;
+      case FacebookLoginStatus.error:
+        setState(() => _isLoggedIn = false);
+        break;
+    }
+  }
+
   @override
   void initState() {
-
-    // username 
+    // username
     _userField = new UserTextFieldIcon(
       baseColor: Colors.grey,
       borderColor: Colors.grey[400],
@@ -57,7 +92,7 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
       validator: Validator.validateName,
     );
 
-    //Password 
+    //Password
     _passwordField = new PasswordTextFieldIcon(
       baseColor: Colors.grey,
       borderColor: Colors.grey[400],
@@ -70,18 +105,16 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
       validator: Validator.validatePassword,
     );
 
-    //email 
+    //email
     _emailField = new EmailTextFieldIcon(
-      baseColor: Colors.grey,
-      borderColor: Colors.grey[400],
-      errorColor: Colors.red,
-      controller: _email,
-      hint: Util.email,
-      icon: Icon(Icons.email),
-      inputType: TextInputType.emailAddress,
-      validator: Validator.validateEmail,
-
-    );
+        baseColor: Colors.grey,
+        borderColor: Colors.grey[400],
+        errorColor: Colors.red,
+        controller: _email,
+        hint: Util.email,
+        icon: Icon(Icons.email),
+        inputType: TextInputType.emailAddress,
+        validator: Validator.validateEmail);
 
     super.initState();
     _controller = new TabController(length: 2, vsync: this);
@@ -117,30 +150,6 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
     });
   }
 
-  // void _onLoading() {
-  //   showDialog(
-  //     context: context,
-  //     barrierDismissible: false,
-  //     builder: (BuildContext context) {
-  //       return Dialog(
-  //         child: new Padding(
-  //           padding: const EdgeInsets.all(30.0),
-  //           child: Column(
-  //             mainAxisSize: MainAxisSize.min,
-  //             children: [
-  //               new CircularProgressIndicator(),
-  //               new Text("Server Error . Please Try Again"),
-  //             ],
-  //           ),
-  //         ),
-  //       );
-  //     },
-  //   );
-  //   new Future.delayed(new Duration(seconds: 1000000), () {
-  //     Navigator.pop(context); //pop dialog
-  //   });
-  // }
-
   void showInSnackBar(String value, BuildContext context) {
     final snackBar = SnackBar(
         content: new SingleChildScrollView(
@@ -169,12 +178,12 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
             content: new Text(Util.alert_desc),
             actions: <Widget>[
               new FlatButton(
-                onPressed: () => SystemChannels.platform.invokeMethod('SystemNavigator.pop'),
+                onPressed: () =>
+                    SystemChannels.platform.invokeMethod('SystemNavigator.pop'),
                 child: new Text(Util.yes),
               ),
               new FlatButton(
-                onPressed: () =>
-                Navigator.of(context).pop(false),
+                onPressed: () => Navigator.of(context).pop(false),
                 child: new Text(Util.no),
               ),
             ],
@@ -192,8 +201,7 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
           resizeToAvoidBottomInset: false,
           resizeToAvoidBottomPadding: false,
           body: Container(
-            padding: EdgeInsets.only(
-                top: 70, left: 30, right: 30, bottom: 30),
+            padding: EdgeInsets.only(top: 70, left: 30, right: 30, bottom: 30),
             decoration: BoxDecoration(image: background(context)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -202,7 +210,7 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
               children: <Widget>[
                 appLogo(),
                 loginRegisteration(),
-                ssoButton(),
+                facebookButton(),
                 AppVersion()
               ],
             ),
@@ -256,90 +264,191 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
         new Container(
           height: 270.0,
           decoration: BoxDecoration(color: Colors.white70),
-          child: new TabBarView(
-            controller: _controller,
-            children: <Widget>[
-              new Padding(
-                  //TODO: LOGIN
-                  padding: const EdgeInsets.fromLTRB(1.0, 1.0, 1.0, 1.0),
-                  child: new ListView(
-                    children: <Widget>[
-                      new Padding(padding: const EdgeInsets.only(bottom: 5.0), child: _userField),
-                      new Padding(padding: const EdgeInsets.only(top: 15.0), child: _passwordField),
-                      new Padding(padding: const EdgeInsets.all(15), child: loginButton()),      
-                      new Padding(padding: const EdgeInsets.all(0), child: resetPassword()) ],
-                  ),
+          child: new TabBarView(controller: _controller, children: <Widget>[
+            new Padding(
+              //TODO: LOGIN
+              padding: const EdgeInsets.fromLTRB(1.0, 1.0, 1.0, 1.0),
+              child: Form(
+                key: this._formLoginKey,
+                child: ListView(
+                  children: <Widget>[
+                    new Padding(
+                        padding: const EdgeInsets.only(bottom: 5.0),
+                        child: _userField),
+                    new Padding(
+                        padding: const EdgeInsets.only(top: 15.0),
+                        child: _passwordField),
+                    new Padding(
+                        padding: const EdgeInsets.all(15),
+                        child: loginButton()),
+                    new Padding(
+                        padding: const EdgeInsets.all(0),
+                        child: resetPassword())
+                  ],
                 ),
-              new Padding(
-                  //TODO: REGISTER
-                  padding: const EdgeInsets.fromLTRB(1.0, 1.0, 1.0, 1.0),
+              ),
+            ),
+            new Padding(
+                //TODO: REGISTER
+                padding: const EdgeInsets.fromLTRB(1.0, 1.0, 1.0, 1.0),
+                child: Form(
+                  key: _formRegisterKey,
                   child: new ListView(
                     children: <Widget>[
-                      new Padding(padding: const EdgeInsets.only(bottom: 5.0), child: _userField),
-                      new Padding(padding: const EdgeInsets.all(0), child: _emailField),
-                      new Padding(padding: const EdgeInsets.only(top: 5.0), child: _passwordField),
-                      new Padding(padding: const EdgeInsets.all(15), child: registerButton())
+                      new Padding(
+                          padding: const EdgeInsets.only(bottom: 5.0),
+                          child: _userField),
+                      new Padding(
+                          padding: const EdgeInsets.all(0), child: _emailField),
+                      new Padding(
+                          padding: const EdgeInsets.only(top: 5.0),
+                          child: _passwordField),
+                      new Padding(
+                          padding: const EdgeInsets.all(15),
+                          child: registerButton())
                     ],
                   ),
-              )
-            ]
-          ),
+                ))
+          ]),
         )
       ],
     );
   }
 
-    loginButton() {
-      return new PrimaryButton(
-        buttonName: Util.signIn,
-        buttonColor: Color(Util.main_default_primary),
-        buttonTextStyle: TextStyle(
-            color: Color(Util.white),
-            fontFamily: Util.BemeLight),
-        onPressed: () {
-          // if (_formKey.currentState.validate()) {
-          //   onLoginPressed();
-          // }
-        },
-      );
-    }
-
-    registerButton() {
-      return new PrimaryButton(
-        buttonName: Util.register,
-        buttonColor: Color(Util.main_default_primary),
-        buttonTextStyle: TextStyle(
-            color: Color(Util.white),
-            fontFamily: Util.BemeLight),
-        onPressed: () {
-          // if (_formKey.currentState.validate()) {
-          //   onLoginPressed();
-          // }
-        },
-      );
-    }
-
-
-  ssoButton() {
-    return Container(
-      child: FacebookSignInButton(
-        onPressed: (){},
-      ),
+  loginButton() {
+    return new PrimaryButton(
+      buttonName: Util.signIn,
+      buttonColor: Color(Util.main_default_primary),
+      highlightColor: Colors.pinkAccent,
+      buttonTextStyle:
+          TextStyle(color: Color(Util.white), fontFamily: Util.BemeLight),
+      onPressed: () {
+        if (_formLoginKey.currentState.validate()) {
+          onLoginPressed();
+        }
+      },
     );
   }
-  
-  resetPassword(){
-    return new Center(
-    child: GestureDetector(
-        child: Text(
-          Util.forget_password, style: TextStyle(color: Color(Util.grey), fontWeight: FontWeight.w100),
-        ),
-        onTap: () {
-          Navigator.pushNamed(context, '/forgetpassword');
-        },
-      )
+
+  registerButton() {
+    return new PrimaryButton(
+        buttonName: Util.register,
+        buttonColor: Color(Util.main_default_primary),
+        highlightColor: Colors.pinkAccent,
+        buttonTextStyle:
+            TextStyle(color: Color(Util.white), fontFamily: Util.BemeLight),
+        onPressed: () {
+          if (_formRegisterKey.currentState.validate()) {
+            onRegisterPressed();
+          }
+        });
+  }
+
+  facebookButton() {
+    return Container(
+      child: SignInButton(Buttons.Facebook, text: Util.login_with_facebook,
+          onPressed: () {
+        //_isLoggedIn ? emptyButton() : _loginWithFB();
+         _loginWithFB();
+      }),
     );
-    
+  }
+
+  emptyButton() {
+    return new OutlineButton(child: Text("Logout"), onPressed: () {});
+  }
+
+  resetPassword() {
+    return new Center(
+        child: GestureDetector(
+      child: Text(
+        Util.forget_password,
+        style: TextStyle(color: Color(Util.grey), fontWeight: FontWeight.w100),
+      ),
+      onTap: () {
+        Navigator.pushNamed(context, '/forgetpassword');
+      },
+    ));
+  }
+
+  onLoginPressed() {
+    var auth = AuthService();
+    auth.login(_username.text, _password.text).then((loginsuccess) {
+      if (loginsuccess) {
+        print('login success');
+        Navigator.pushNamed(context, '/dashboard');
+      } else {
+        print('login failed');
+        alertDialog();
+      }
+    });
+  }
+
+  onRegisterPressed() {
+    var http = HttpService();
+    http
+        .postAuthRegisteration(_username.text, _email.text, _password.text)
+        .then((registerSuccess) {
+      if (registerSuccess != null) {
+        print("Registeration: OK");
+        successDialog();
+        _controller.animateTo((_controller.index + 1) % 2);
+      } else {
+        print("Registeration: Fail");
+        showInSnackBar(Util.please_try_again, context);
+      }
+    });
+  }
+
+   void successDialog() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) => CustomDialog(
+              title: Util.login_error_title,
+              description: Util.message_activation,
+              buttonText: Util.ok,
+              icon: Icons.email,
+              color: Color(Util.white),
+              iconColor: Color(Util.green),
+            ));
+  }
+
+  void alertDialog() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) => CustomDialog(
+              title: Util.login_error_title,
+              description: Util.login_error_description,
+              buttonText: Util.ok,
+              icon: Icons.error_outline,
+              color: Color(Util.white),
+              iconColor: Color(Util.red),
+            ));
+  }
+
+  void loginProccess() {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: new Padding(
+            padding: const EdgeInsets.all(30.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                new CircularProgressIndicator(),
+                new Container(),
+                new Text(Util.loading),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+    new Future.delayed(new Duration(seconds: 10), () {
+      Navigator.pop(context); //pop dialog
+    });
   }
 
   // Styles
@@ -353,6 +462,5 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
       color: Color(Util.white), fontFamily: Util.BemeRegular, fontSize: 15);
 
   var background = (BuildContext context) => new DecorationImage(
-      image: new AssetImage("assets/images/login.png"),
-      fit: BoxFit.cover);
+      image: new AssetImage("assets/images/login.png"), fit: BoxFit.cover);
 }

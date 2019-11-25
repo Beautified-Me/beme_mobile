@@ -1,7 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:Utician/data/auth.dart';
+import 'package:Utician/data/register.dart';
+import 'package:Utician/util/util.dart';
 import 'package:http/http.dart' as http;
 import 'dart:io';
+
+import 'auth_service.dart';
 
 class HttpService {
   String _baseUrl;
@@ -13,33 +18,75 @@ class HttpService {
   }
 
   HttpService._internal()
-      : _baseUrl = Util.BASE_URL,
+      : _baseUrl = Util.BASE_DEVELOPMENT_URL,
         _auth = AuthService();
 
 
 
   //Login
-  Future<AuthLoginResponse> postAuthLogin(
-      String companyId, String username, String password) async {
+  Future<AuthLoginResponse> postAuthLogin(String username, String password) async {
     var response = await _post(Util.ENDPOINT_AUTH_LOGIN, body: {
-      'appPlatformProductCode': Util.appPlatformProductCode,
-      'companyId': companyId,
-      'username': username,
+      'userName': username,
       'password': password,
     });
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == 201) {
       if (response.body != null && response.body.length > 0) {
         return AuthLoginResponse.fromJson(json.decode(response.body));
       } else {
         return null;
       }
-    } else {
+    } 
+    else {
       print("Response: (${response.statusCode})" + response.body);
       throw Exception('Failed to load post');
     }
   }
 
+  //Registeration 
+  Future<AuthRegisterResponse> postAuthRegisteration(String username, String email, String password) async{
+    var response = await _post(Util.ENDPOINT_AUTH_REGISTER, body: {
+      'userName' : username,
+      'userEmail': email,
+      'password' : password,
+    });
+
+    if (response.statusCode == 201) {
+      if (response.body != null && response.body.length > 0) {
+        return AuthRegisterResponse.fromJson(json.decode(response.body));
+      } else {
+        print("throw error herer");
+        return null;
+      }
+    } 
+    else {
+      print("Response: (${response.statusCode})" + response.body);
+      //throw Exception('Failed to load post');
+      return null;
+    }
+  }
+
+  //Forget Password
+  Future<AuthRegisterResponse> postAuthForgotPassword(String username, String email) async{
+    var response = await _post(Util.ENDPOINT_AUTH_FORGOTPASSWORD, body: {
+      'userName' : username,
+      'email': email,
+
+    });
+
+    if (response.statusCode == 201) {
+      if (response.body != null && response.body.length > 0) {
+        return AuthRegisterResponse.fromJson(json.decode(response.body));
+      } else {
+        return null;
+      }
+    } 
+    else {
+      print("Response: (${response.statusCode})" + response.body);
+      //throw Exception('Failed to load post');
+      return null;
+    }
+  }
 
   //POST
   Future<http.Response> _post(String urn, {Map<String, dynamic> body}) {

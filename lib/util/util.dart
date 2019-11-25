@@ -3,16 +3,23 @@ class Util {
   static const BASE_URL = "URL PRODUCTION";
 
   //URL Development/Staging
-  static const BASE_DEVELOPMENT_URL = "http://35.240.205.14:3000";
+  static const BASE_DEVELOPMENT_URL = "http://35.240.205.140:3000";
+  static const BASE_DEVELOPMENT_URL_PORT ="http://35.240.205.140:6000";
 
 
   //Post Endpoint
-  static const ENDPOINT_COMPANY_INFO = "company/info/";
-  static const ENDPOINT_AUTH_LOGIN = "auth/login/";
+  static const ENDPOINT_AUTH_LOGIN = "/auth/login";
+  static const ENDPOINT_AUTH_REGISTER  = '/auth/register';
+  static const ENDPOINT_AUTH_FORGOTPASSWORD = '/auth/forgotPassword';
+  static const ENDPOINT_AUTH_RESETPASSWORD = '/auth/resetPassword';
 
-
-  //get Endpoint
-  static const ENDPOINT_PRODUCT = "FloorStaff/user-floor-staff/";
+  //Get EndPoint
+  static const ENDPOINT_API_COLOR = "/api/colour";
+  static const ENDPOINT_API_PRODUCT ='api/product';
+  static const ENDPOINT_API_PRODUCTYPE= '/api/productType';
+  static const ENDPOINT_API_USER = '/api/user';
+  static const ENDPOINT_API_PRODUCTSEARCH ='/api/productSearch';
+  static const ENDPOINT_API_PRODUCTSEARCH_BY_OBJECT ='api/productSearchByObject';
 
   //Menu
   static const String history = "History";
@@ -45,6 +52,7 @@ class Util {
   static const String backButton = "BACK";
   static const String signIn = "SIGN IN";
   static const String register = "REGISTER"; 
+  static const String login_with_facebook = "LOGIN WITH FACEBOOK";
   static const String ok = "Ok";
   static const String cancel = "Cancel";
   static const String yes = "Yes";
@@ -60,21 +68,15 @@ class Util {
   static const String new_password = "New Password";
   static const String new_password_again = "Confirm New Password";
   static const String forget_password_button = "Recover Password";
-
-  
-  //Appbar String 
-  static const String goodInbounds_bar = "Good Inbounds";
-  static const String asn_detail_bar = "ASN Details";
-  static const String receiving_do_bar = "Receiving DO";
-  static const String take_picture = "Take a picture";
-  static const String select_gallery = "Select from gallery";
-
-
+  static const String loading = "Loading";
+  static const String please_try_again = "Please enter your credential and Try Again";
+  static const String message_activation = "Please enter your email for account activation";
 
   //error
   static const String unknown = "Unknown error";
   static const String projectCodeError = "Failed to get platform version.";
-  static const String company_code_error = "Invalid Company Code";
+  static const String login_error_title = "Opps...";
+  static const String login_error_description = "Invalid Username/Password. Try Again";
   static const String alert_title = "Are you sure?";
   static const String alert_desc = "Do you want to exit an App";
 

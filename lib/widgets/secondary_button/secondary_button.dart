@@ -11,10 +11,12 @@ class SecondaryButton extends StatelessWidget {
   final Color splashColor;
   final Color borderColor;
   final double borderWidth;
+  final Color highlightColor;
 
   SecondaryButton(
       {this.title,
       this.textColor,
+      this.highlightColor,
       this.fontSize,
       this.fontWeight,
       this.onPressed,
@@ -28,6 +30,7 @@ class SecondaryButton extends StatelessWidget {
     return FlatButton(
       onPressed: onPressed,
       color: color,
+      highlightColor: highlightColor,
       splashColor: splashColor,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 12.0),

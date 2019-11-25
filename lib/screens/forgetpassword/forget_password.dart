@@ -1,8 +1,11 @@
+import 'package:Utician/services/http_service.dart';
 import 'package:Utician/util/app_version.dart';
+import 'package:Utician/util/custom_dialog.dart';
 import 'package:Utician/util/util.dart';
 import 'package:Utician/util/validator.dart';
-import 'package:Utician/widgets/password_textfield_icon/index.dart';
+import 'package:Utician/widgets/email_textfield_icon/index.dart';
 import 'package:Utician/widgets/primary_button/index.dart';
+import 'package:Utician/widgets/user_textfield_icon/user_textfield_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -13,50 +16,41 @@ class ForgetPassword extends StatefulWidget {
 
 class _ForgetPasswordState extends State<ForgetPassword>
     with SingleTickerProviderStateMixin {
-  PasswordTextFieldIcon _currentPasswordField;
-  PasswordTextFieldIcon _newPasswordField;
-  PasswordTextFieldIcon _newPasswordAgainField;
+  
+  UserTextFieldIcon  _userTextField;
+  EmailTextFieldIcon _emailTextField;
 
-  final TextEditingController _currentPassword = new TextEditingController();
-  final TextEditingController _newPassword = new TextEditingController();
-  final TextEditingController _confirmPassword = new TextEditingController();
-
+  final TextEditingController _username = new TextEditingController();
+  final TextEditingController _email = new TextEditingController();
+  
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+  final _recoveryKey = GlobalKey<FormState>();
 
   @override
   void initState() {
-    _currentPasswordField = new PasswordTextFieldIcon(
+    _userTextField = new UserTextFieldIcon(
       borderColor: Colors.grey[400],
       errorColor: Colors.red,
-      controller: _currentPassword,
+      controller: _username,
       obscureText: true,
-      hint: Util.current_password,
+      hint: Util.username,
       icon: Icon(Icons.lock),
-      inputType: TextInputType.visiblePassword,
+      inputType: TextInputType.text,
       validator: Validator.validatePassword,
     );
 
-    _newPasswordField = new PasswordTextFieldIcon(
+    _emailTextField = new EmailTextFieldIcon(
       borderColor: Colors.grey[400],
       errorColor: Colors.red,
-      controller: _newPassword,
+      controller: _email,
       obscureText: true,
-      hint: Util.new_password,
+      hint: Util.email,
       icon: Icon(Icons.lock),
-      inputType: TextInputType.visiblePassword,
+      inputType: TextInputType.emailAddress,
       validator: Validator.validatePassword,
     );
 
-    _newPasswordAgainField = new PasswordTextFieldIcon(
-      borderColor: Colors.grey[400],
-      errorColor: Colors.red,
-      controller: _confirmPassword,
-      obscureText: true,
-      hint: Util.new_password_again,
-      icon: Icon(Icons.lock),
-      inputType: TextInputType.visiblePassword,
-      validator: Validator.validatePassword,
-    );
+    
     super.initState();
   }
 
@@ -116,47 +110,103 @@ class _ForgetPasswordState extends State<ForgetPassword>
     return Container(
       height: 380,
       decoration: BoxDecoration(color: Colors.white70),
-      child: new Column(
-        children: <Widget>[
-          new Padding(
-              padding: const EdgeInsets.all(30),
-              child: Text(Util.forget_password_title, style: boldTextStyle)),
-          new Padding(
-            padding: const EdgeInsets.all(10),
-            child: _currentPasswordField,
-          ),
-          new Padding(
-            padding: const EdgeInsets.all(10),
-            child: _newPasswordField,
-          ),
-          new Padding(
-              padding: const EdgeInsets.all(10), child: _newPasswordAgainField),
-          new Padding(
-            padding:  const EdgeInsets.all(5), child: forgetPasswordButton(),
-          )    
-        ],
+      child: new Form(
+        key: _recoveryKey,
+        child: Column(
+          children: <Widget>[
+            new Padding(
+                padding: const EdgeInsets.all(30),
+                child: Text(Util.forget_password_title, style: boldTextStyle)),
+            new Padding(
+              padding: const EdgeInsets.all(10),
+              child: _userTextField,
+            ),
+            new Padding(
+              padding: const EdgeInsets.all(10),
+              child: _emailTextField,
+            ),
+            // new Padding(
+            //     padding: const EdgeInsets.all(10),
+            //     child: _newPasswordAgainField),
+            new Padding(
+              padding: const EdgeInsets.all(5),
+              child: forgetPasswordButton(),
+            )
+          ],
+        ),
       ),
     );
   }
 
-forgetPasswordButton(){
-  return new PrimaryButton(
-        buttonName: Util.forget_password_button,
-        buttonColor: Color(Util.main_default_primary),
-        buttonTextStyle: TextStyle(
-            color: Color(Util.white),
-            fontFamily: Util.BemeLight),
-        onPressed: () {
-          // if (_formKey.currentState.validate()) {
-          //   onLoginPressed();
-          // }
-        },
-      );
-}
+  forgetPasswordButton() {
+    return new PrimaryButton(
+      buttonName: Util.forget_password_button,
+      highlightColor: Colors.pinkAccent,
+      buttonColor: Color(Util.main_default_primary),
+      buttonTextStyle:
+          TextStyle(color: Color(Util.white), fontFamily: Util.BemeLight),
+      onPressed: () {
+        if (_recoveryKey.currentState.validate()) {
+          onRecoveryPressed();
+        }
+      },
+    );
+  }
+
+  onRecoveryPressed() {
+  var http = HttpService();
+    http
+        .postAuthForgotPassword(_username.text, _email.text)
+        .then((forgetPasswordSuccess) {
+      if (forgetPasswordSuccess != null) {
+        print("Registeration: OK");
+        successDialog();
+      } else {
+        print("Registeration: Fail");
+        alertDialog();
+      }
+    });
+  }
+
+
+  void successDialog() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) => CustomDialog(
+              title: Util.login_error_title,
+              description: Util.message_activation,
+              buttonText: Util.ok,
+              icon: Icons.email,
+              color: Color(Util.white),
+              iconColor: Color(Util.green),
+            ));
+  }
+
+  void alertDialog() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) => CustomDialog(
+              title: Util.login_error_title,
+              description: Util.login_error_description,
+              buttonText: Util.ok,
+              icon: Icons.error_outline,
+              color: Color(Util.white),
+              iconColor: Color(Util.red),
+            ));
+  }
+
+
+
   backLogin() {
     return new Center(
-      child: GestureDetector( child: Text(Util.backButton, style: connectionTextStyle,) , onTap: () {Navigator.pop(context);} ),
-      
+      child: GestureDetector(
+          child: Text(
+            Util.backButton,
+            style: connectionTextStyle,
+          ),
+          onTap: () {
+            Navigator.pop(context);
+          }),
     );
   }
 

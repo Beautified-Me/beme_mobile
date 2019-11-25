@@ -193,13 +193,14 @@ class _OnboardingState extends State<Onboarding> {
                     fontWeight: FontWeight.w700,
                     textColor: Colors.white,
                     onPressed: () {
-                      widget.prefs.setBool('seen', true);
+                      //widget.prefs.setBool('seen', true);
                       Navigator.of(context).pushNamed("/login");
                     },
                     splashColor: Colors.black12,
                     borderColor: Colors.white,
                     borderWidth: 2,
                     color: Color(Util.purple),
+                    highlightColor: Colors.deepPurple[900],
                   ),
                 ),
               ],

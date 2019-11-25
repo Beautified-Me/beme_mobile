@@ -5,11 +5,13 @@ class PrimaryButton extends StatelessWidget {
   final TextStyle buttonTextStyle;
   final String buttonName;
   final Color buttonColor;
+  final Color highlightColor;
 
   PrimaryButton(
       {this.buttonName,
       this.onPressed,
       this.buttonTextStyle,
+      this.highlightColor,
       this.buttonColor});
 
   @override
@@ -22,6 +24,7 @@ class PrimaryButton extends StatelessWidget {
             // shape: new RoundedRectangleBorder(
             //     borderRadius: new BorderRadius.circular(4.0)),
             color: buttonColor,
+            highlightColor: highlightColor,
             onPressed: onPressed));
   }
 }
