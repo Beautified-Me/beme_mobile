@@ -11,7 +11,7 @@ class SecondaryButton extends StatelessWidget {
   final Color splashColor;
   final Color borderColor;
   final double borderWidth;
-  final Color highlightColor;
+   final Color highlightColor;
 
   SecondaryButton(
       {this.title,
