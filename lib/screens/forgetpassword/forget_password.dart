@@ -125,11 +125,8 @@ class _ForgetPasswordState extends State<ForgetPassword>
               padding: const EdgeInsets.all(10),
               child: _emailTextField,
             ),
-            // new Padding(
-            //     padding: const EdgeInsets.all(10),
-            //     child: _newPasswordAgainField),
-            new Padding(
-              padding: const EdgeInsets.all(5),
+            new Container(
+              margin: const EdgeInsets.only(top: 20.0, bottom: 20.0),
               child: forgetPasswordButton(),
             )
           ],

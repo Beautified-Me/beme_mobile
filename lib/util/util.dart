@@ -63,7 +63,7 @@ class Util {
   static const String network_error = "No Internet Connection";
   static const String network_good = "Back Online";
   static const String email = 'E-mail Address';
-  static const String forget_password_title = "Please Type your current and new password";
+  static const String forget_password_title = "Please Type your Current UserName and Email. We will send temporary password to your email address.";
   static const String current_password = "Current Password";
   static const String new_password = "New Password";
   static const String new_password_again = "Confirm New Password";
