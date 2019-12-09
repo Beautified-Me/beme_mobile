@@ -8,6 +8,8 @@ import 'package:Utician/widgets/primary_button/index.dart';
 import 'package:Utician/widgets/user_textfield_icon/user_textfield_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
+
 
 class ForgetPassword extends StatefulWidget {
   @override
@@ -26,13 +28,14 @@ class _ForgetPasswordState extends State<ForgetPassword>
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _recoveryKey = GlobalKey<FormState>();
 
+  bool _isInAsyncCall = false;
+
   @override
   void initState() {
     _userTextField = new UserTextFieldIcon(
       borderColor: Colors.grey[400],
-      errorColor: Colors.red,
+      errorColor: Colors.red[600],
       controller: _username,
-      obscureText: true,
       hint: Util.username,
       icon: Icon(Icons.lock),
       inputType: TextInputType.text,
@@ -41,9 +44,8 @@ class _ForgetPasswordState extends State<ForgetPassword>
 
     _emailTextField = new EmailTextFieldIcon(
       borderColor: Colors.grey[400],
-      errorColor: Colors.red,
+      errorColor: Colors.red[600],
       controller: _email,
-      obscureText: true,
       hint: Util.email,
       icon: Icon(Icons.lock),
       inputType: TextInputType.emailAddress,
@@ -80,9 +82,14 @@ class _ForgetPasswordState extends State<ForgetPassword>
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: _onWillPop,
-      child: new Scaffold(
+      child: new ModalProgressHUD( 
+          opacity: 0.4,
+          color: Colors.pinkAccent,
+          inAsyncCall: _isInAsyncCall,
+          progressIndicator: CircularProgressIndicator(),
+        child:  new Scaffold(
         body: Container(
-          padding: EdgeInsets.only(top: 70, left: 30, right: 30, bottom: 30),
+          padding: EdgeInsets.only(top: 70, left: 20, right: 20, bottom: 30),
           decoration: BoxDecoration(image: background(context)),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -97,6 +104,7 @@ class _ForgetPasswordState extends State<ForgetPassword>
           ),
         ),
       ),
+    )
     );
   }
 
@@ -108,7 +116,7 @@ class _ForgetPasswordState extends State<ForgetPassword>
 
   forgetPasswordForm() {
     return Container(
-      height: 380,
+      height: 400,
       decoration: BoxDecoration(color: Colors.white70),
       child: new Form(
         key: _recoveryKey,
@@ -144,6 +152,10 @@ class _ForgetPasswordState extends State<ForgetPassword>
           TextStyle(color: Color(Util.white), fontFamily: Util.BemeLight),
       onPressed: () {
         if (_recoveryKey.currentState.validate()) {
+            FocusScope.of(context).requestFocus(new FocusNode());
+                setState(() {
+            _isInAsyncCall = true;
+          });
           onRecoveryPressed();
         }
       },
@@ -157,10 +169,14 @@ class _ForgetPasswordState extends State<ForgetPassword>
         .then((forgetPasswordSuccess) {
       if (forgetPasswordSuccess != null) {
         print("Registeration: OK");
+        Navigator.pushNamed(context, '/login');
         successDialog();
       } else {
         print("Registeration: Fail");
         alertDialog();
+           setState(() {
+          _isInAsyncCall = false;
+        });
       }
     });
   }
@@ -170,7 +186,7 @@ class _ForgetPasswordState extends State<ForgetPassword>
     showDialog(
         context: context,
         builder: (BuildContext context) => CustomDialog(
-              title: Util.login_error_title,
+              title: Util.success_title,
               description: Util.message_activation,
               buttonText: Util.ok,
               icon: Icons.email,
@@ -184,11 +200,12 @@ class _ForgetPasswordState extends State<ForgetPassword>
         context: context,
         builder: (BuildContext context) => CustomDialog(
               title: Util.login_error_title,
-              description: Util.login_error_description,
+              description: Util.current_username_email,
               buttonText: Util.ok,
               icon: Icons.error_outline,
               color: Color(Util.white),
               iconColor: Color(Util.red),
+               
             ));
   }
 

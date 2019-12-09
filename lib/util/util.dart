@@ -70,15 +70,47 @@ class Util {
   static const String forget_password_button = "Recover Password";
   static const String loading = "Loading";
   static const String please_try_again = "Please enter your credential and Try Again";
+  static const String congrutulation = "Congratulation";
   static const String message_activation = "Please enter your email for account activation";
+  static const String message_already = "Either this email has already been registered or Username is already Taken. Please try again.";
+  static const String empty_username = "Username cannot be empty";
+  static const String emtpty_useremail = "Email Address cannot be empty";
+  static const String empty_password ="Password cannot be empty";
+  static const String current_username_email = "Couldnt find username and email address. Please Register your account";
+  static const String get_profile_data = "ProfileData";
+  static const String profile = "Profile";
+  static const String update_profile = "Update Profile";
+  static const String edit_profile = "Edit Profile";
+
+  //Menu 
+  static const String home = "Home";
+  static const String see_profile =  "See profile";
+  static const String privacy_settings = "Privacy Settings";
+  static const String about = "About";
+
+  
+  //Profile 
+  static const String profile_name = "Name";
+  static const String profile_email = "Email";
+  static const String profile_age = "Age";
+  static const String profile_address_one = "Address 1";
+  static const String profile_address_two = "Address 2";
+  static const String profile_phone =" Phone Number";
+  static const String profile_gender = "Gender";
+  static const String profile_gender_male = "Male";
+  static const String profile_gender_female ="Female";
 
   //error
   static const String unknown = "Unknown error";
   static const String projectCodeError = "Failed to get platform version.";
   static const String login_error_title = "Opps...";
-  static const String login_error_description = "Invalid Username/Password. Try Again";
+  static const String success_title = "Yay!";
+  static const String login_error_description = "Invalid Username/Password or If you registered succesfful, Account May Not activated. Please activate your account..";
   static const String alert_title = "Are you sure?";
   static const String alert_desc = "Do you want to exit an App";
+  static const String default_tap_activity_scan = "Tap to Activity the Scan Your facial";
+  static const String already_signin = "Logout Facebook";
+
 
   //Dimens
   static const double bemeSize = 50.0;

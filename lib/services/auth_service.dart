@@ -4,11 +4,14 @@ import 'package:Utician/util/util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:rxdart/rxdart.dart';
 
+
 class AuthService {
+  var profileData;
   bool _loggedIn = false;
   String _token;
   Storage str = new Storage();
-  
+
+
 
   final _loginStatusSubject = new BehaviorSubject<bool>.seeded(false);
 
@@ -54,6 +57,9 @@ class AuthService {
 
     return false;
   }
+
+
+
 
   logout() {
     _loggedIn = false;

@@ -42,7 +42,13 @@ class _EmailTextFieldIconState extends State<EmailTextFieldIcon> {
     return Container(
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 10.0),
-        child: TextField(
+        child: TextFormField(
+             validator: (value) {
+              if (value.isEmpty) {
+                return Util.emtpty_useremail;
+              }
+              return null;
+            },
           obscureText: widget.obscureText,
           onChanged: (text) {
             if (widget.onChanged != null) {
@@ -66,7 +72,9 @@ class _EmailTextFieldIconState extends State<EmailTextFieldIcon> {
             ),
             
             hintText: widget.hint,
-            icon: Icon(Icons.email)
+            icon: Icon(Icons.email),
+            
+
           ),
         ),
       ),

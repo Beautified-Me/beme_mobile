@@ -21,10 +21,9 @@ class HttpService {
       : _baseUrl = Util.BASE_DEVELOPMENT_URL,
         _auth = AuthService();
 
-
-
   //Login
-  Future<AuthLoginResponse> postAuthLogin(String username, String password) async {
+  Future<AuthLoginResponse> postAuthLogin(
+      String username, String password) async {
     var response = await _post(Util.ENDPOINT_AUTH_LOGIN, body: {
       'userName': username,
       'password': password,
@@ -36,42 +35,39 @@ class HttpService {
       } else {
         return null;
       }
-    } 
-    else {
+    } else {
       print("Response: (${response.statusCode})" + response.body);
       throw Exception('Failed to load post');
     }
   }
 
-  //Registeration 
-  Future<AuthRegisterResponse> postAuthRegisteration(String username, String email, String password) async{
+  //Registeration
+  Future<AuthRegisterResponse> postAuthRegisteration(
+      String username, String email, String password) async {
     var response = await _post(Util.ENDPOINT_AUTH_REGISTER, body: {
-      'userName' : username,
+      'userName': username,
       'userEmail': email,
-      'password' : password,
+      'password': password,
     });
 
     if (response.statusCode == 201) {
       if (response.body != null && response.body.length > 0) {
         return AuthRegisterResponse.fromJson(json.decode(response.body));
       } else {
-        print("throw error herer");
         return null;
       }
-    } 
-    else {
+    } else {
       print("Response: (${response.statusCode})" + response.body);
-      //throw Exception('Failed to load post');
       return null;
     }
   }
 
   //Forget Password
-  Future<AuthRegisterResponse> postAuthForgotPassword(String username, String email) async{
+  Future<AuthRegisterResponse> postAuthForgotPassword(
+      String username, String email) async {
     var response = await _post(Util.ENDPOINT_AUTH_FORGOTPASSWORD, body: {
-      'userName' : username,
+      'userName': username,
       'email': email,
-
     });
 
     if (response.statusCode == 201) {
@@ -80,8 +76,7 @@ class HttpService {
       } else {
         return null;
       }
-    } 
-    else {
+    } else {
       print("Response: (${response.statusCode})" + response.body);
       //throw Exception('Failed to load post');
       return null;
@@ -118,7 +113,3 @@ class HttpService {
     return http.get(_baseUrl + urn, headers: headers);
   }
 }
-
-
-
-

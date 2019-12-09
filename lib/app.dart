@@ -1,6 +1,8 @@
+import 'package:Utician/screens/about/index.dart';
 import 'package:Utician/screens/dashboard/index.dart';
 import 'package:Utician/screens/forgetpassword/index.dart';
 import 'package:Utician/screens/onboard/index.dart';
+import 'package:Utician/screens/profile/index.dart';
 import 'package:Utician/screens/splash/index.dart';
 import 'package:Utician/screens/login/index.dart';
 import 'package:Utician/util/util.dart';
@@ -12,7 +14,9 @@ final appRoutes = <String, WidgetBuilder>{
   '/walkthrough': (BuildContext context) => Scaffold(body: Onboarding()),
   '/login': (BuildContext context) => Scaffold(body: Login()),
   '/forgetpassword': (BuildContext context) => Scaffold(body: ForgetPassword()),
-  '/dashboard' : (BuildContext context) => Scaffold(body: Dashboard())
+  '/dashboard' : (BuildContext context) => Scaffold(body: Dashboard()),
+  '/profile' : (BuildContext context) => Scaffold(body: Profile()),
+  '/about' : (BuildContext context) => Scaffold(body: About(),)
 };
 
 class App extends StatelessWidget {

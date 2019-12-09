@@ -1,4 +1,5 @@
 import 'package:Utician/util/util.dart';
+import 'package:Utician/util/validator.dart';
 import 'package:flutter/material.dart';
 
 class UserTextFieldIcon extends StatefulWidget {
@@ -12,6 +13,7 @@ class UserTextFieldIcon extends StatefulWidget {
   final Function validator;
   final Function onChanged;
   final Icon icon;
+  final String errorCode;
 
   UserTextFieldIcon(
       {this.hint,
@@ -23,7 +25,8 @@ class UserTextFieldIcon extends StatefulWidget {
       this.inputType = TextInputType.text,
       this.obscureText = false,
       this.validator,
-      this.icon });
+      this.icon,
+      this.errorCode });
 
   _UserTextFieldIconState createState() => _UserTextFieldIconState();
 }
@@ -42,7 +45,13 @@ class _UserTextFieldIconState extends State<UserTextFieldIcon> {
     return Container(
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 10.0),
-        child: TextField(
+        child: TextFormField(
+          validator: (value) {
+              if (value.isEmpty) {
+                return Util.empty_username;
+              }
+              return null;
+            },
           obscureText: widget.obscureText,
           onChanged: (text) {
             if (widget.onChanged != null) {
@@ -58,6 +67,7 @@ class _UserTextFieldIconState extends State<UserTextFieldIcon> {
           }, 
           //keyboardType: widget.inputType,
           controller: widget.controller,
+          autofocus: true,
           decoration: InputDecoration(
             hintStyle: TextStyle(
               color: widget.baseColor,
@@ -66,7 +76,9 @@ class _UserTextFieldIconState extends State<UserTextFieldIcon> {
             ),
             
             hintText: widget.hint,
-            icon: Icon(Icons.people)
+            icon: Icon(Icons.people),  
+            errorText: widget.errorCode,
+            
             //prefixIcon: Icon(Icons.lock_outline)
           ),
         ),

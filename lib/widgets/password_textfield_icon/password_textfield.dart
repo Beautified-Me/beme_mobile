@@ -12,6 +12,7 @@ class PasswordTextFieldIcon extends StatefulWidget {
   final Function validator;
   final Function onChanged;
   final Icon icon;
+  final String errorCode;
 
   PasswordTextFieldIcon(
       {this.hint,
@@ -23,7 +24,8 @@ class PasswordTextFieldIcon extends StatefulWidget {
       this.inputType = TextInputType.text,
       this.obscureText = false,
       this.validator,
-      this.icon });
+      this.icon,
+      this.errorCode });
 
   _PasswordTextFieldIconState createState() => _PasswordTextFieldIconState();
 }
@@ -42,7 +44,13 @@ class _PasswordTextFieldIconState extends State<PasswordTextFieldIcon> {
     return Container(
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 10.0),
-        child: TextField(
+        child: TextFormField(
+             validator: (value) {
+              if (value.isEmpty) {
+                return Util.empty_password;
+              }
+              return null;
+            },
           obscureText: widget.obscureText,
           onChanged: (text) {
             if (widget.onChanged != null) {
@@ -67,6 +75,7 @@ class _PasswordTextFieldIconState extends State<PasswordTextFieldIcon> {
             
             hintText: widget.hint,
             icon: Icon(Icons.lock_outline),
+            errorText: widget.errorCode,
             suffixIcon: new GestureDetector(
              onTap: () {
               setState(() {

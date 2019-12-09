@@ -1,9 +1,16 @@
+import 'package:Utician/data/user.dart';
 import 'package:Utician/services/auth_service.dart';
 import 'package:Utician/util/util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 
 class Dashboard extends StatefulWidget {
+  final User userdata;
+  Dashboard({Key key, this.userdata}) : super(key: key);
+  
+
   @override
   _DashboardState createState() => _DashboardState();
 }
@@ -11,185 +18,281 @@ class Dashboard extends StatefulWidget {
 class _DashboardState extends State<Dashboard> {
   static const _kFontFam = 'MyFlutterApp';
   static const IconData logout = const IconData(0xe800, fontFamily: _kFontFam);
+  bool camState = false;
+  
+  String name;
+  String email;
+  String profile_picture;
 
+  static final FacebookLogin facebookSignIn = new FacebookLogin();
 
   @override
   void initState() {
     super.initState();
-    // _getSharedPreferenceString(Util.staffcode).then((storedCode) {
-    //   if (storedCode != null) {
-    //     setState(() {
-    //       staffCode = storedCode;
-    //     });
-    //   }
-    // });
 
-    // _getSharedPreferenceString(Util.staffName).then((storedName) {
-    //   if (storedName != null) {
-    //     setState(() {
-    //       staffName = storedName;
-    //     });
-    //   }
-    // });
+    _getSharedPreferenceString("name").then((storedName) {
+      if (storedName != null) {
+        setState(() {
+          name = storedName;
+          print("name" + name);
+        });
+      }
+    });
+
+    _getSharedPreferenceString("email").then((storedEmail) {
+      if (storedEmail != null) {
+        setState(() {
+          email = storedEmail;
+          print("email" + email);
+        });
+      }
+    });
+
+    _getSharedPreferenceString("profilePicture").then((storedPicture) {
+      if (storedPicture != null) {
+        setState(() {
+          profile_picture = storedPicture;
+        });
+      }
+    });
   }
 
-  
+  Future<bool> _onWillPop() {
+    return showDialog(
+          context: context,
+          builder: (context) => new AlertDialog(
+            title: new Text(Util.alert_title),
+            content: new Text(Util.alert_desc),
+            actions: <Widget>[
+              new FlatButton(
+                onPressed: () =>
+                    SystemChannels.platform.invokeMethod('SystemNavigator.pop'),
+                child: new Text(Util.yes),
+              ),
+              new FlatButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: new Text(Util.no),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: <Widget>[
-        new Container(
-          height: double.infinity,
-          width: double.infinity,
-          decoration: BoxDecoration(color: Color(Util.white))),
-        Scaffold(
-          backgroundColor: Colors.transparent,
-          appBar: new AppBar(
-            backgroundColor: Colors.transparent,
-            elevation: 0.0,
-            actions: <Widget>[
-              new IconButton(
-                icon: new Icon(logout),
-                onPressed: () => onLogoutClicked(),
-              )
-            ],
-          ),
-          drawer: bemeDrawerPage(),
-          body: new Container(
-            padding: EdgeInsets.only(top: 3, left: 30, right: 30, bottom: 10),
-            color: Colors.transparent,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisSize: MainAxisSize.max,
-              children: <Widget>[
-                //Camera
-                  
-                //Camera Target
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
+    return new WillPopScope(
+        onWillPop: _onWillPop,
+        child: Stack(
+          children: <Widget>[
+            new Container(
+                height: double.infinity,
+                width: double.infinity,
+                decoration: BoxDecoration(color: Color(Util.white))),
+            Scaffold(
+                backgroundColor: Colors.transparent,
+                appBar: new AppBar(
+                  backgroundColor: Colors.black,
+                  elevation: 0.0,
+                  iconTheme: new IconThemeData(color: Colors.white),
+                ),
+                drawer: bemeDrawerPage(),
+                body: Column(
+                  children: <Widget>[
+                    Container(
+                      child: camState
+                          ? accessTabScanning()
+                          : defaultAccessTabCamera(),
+                    ),
+                    Container(
+                      height: 146,
+                      child: cameraButton(),
+                    )
+                  ],
+                )),
+          ],
+        ));
   }
 
-
-  
-  profilePictureSection() {
-    var theme = Theme.of(context);
-    return new Container(
-      width: 90.0,
-      height: 90.0,
-      decoration: new BoxDecoration(
-        color: Colors.transparent,
-        image: new DecorationImage(
-          image: new AssetImage('assets/images/defaultProfilePicture.jpg'),
-          fit: BoxFit.cover,
-        ),
-        borderRadius: new BorderRadius.all(new Radius.circular(50.0)),
-        border: new Border.all(
-          color: theme.primaryColor,
-          width: 2.5,
+  Widget defaultAccessTabCamera() {
+    return new Padding(
+      padding: EdgeInsets.all(0.0),
+      child: new Container(
+        width: double.infinity,
+        height: 500,
+        decoration: BoxDecoration(
+            color: Colors.black,
+            shape: BoxShape.rectangle,
+            border: Border(
+                bottom: BorderSide(width: 0.4, color: Color(Util.black)))),
+        child: Center(
+          child: new Container(
+            padding: const EdgeInsets.all(50.0),
+            decoration: BoxDecoration(
+              color: Colors.black,
+              shape: BoxShape.rectangle,
+            ),
+            child:
+                new Text(Util.default_tap_activity_scan, style: scanTextStyle),
+          ),
         ),
       ),
     );
   }
 
-  dashboardMenuSection() {
-    var theme = Theme.of(context);
-    return new Container(
-      height: 130.0,
-      decoration: new BoxDecoration(
-          color: Color(Util.white),
-          border: Border.all(width: 0.8),
-          borderRadius: BorderRadius.all(Radius.circular(8.0))),
-      child: ListView(
-        children: <Widget>[
-          ListTile(
-              onTap: () {
-                Navigator.pushReplacementNamed(context, '/inbound');
-              },
-              leading: Container(
-                child: new Icon(Icons.local_mall, color: theme.primaryColor),
-              ),
-              title: Padding(
-                  padding: EdgeInsets.only(left: 5.0),
-                  child: Text(Util.goodInbound, style: normalTextStyle)),
-              trailing: Icon(Icons.keyboard_arrow_right)),
-          new Divider(),
-          ListTile(
-              leading: Container(
-                child: new Icon(
-                  Icons.store_mall_directory,
-                  color: theme.primaryColor,
+  Widget accessTabScanning() {
+    // return new GestureDetector(onTap: () {
+    //   setState(() {
+    //     camState = false;
+    //   });
+    // });
+  }
+
+  cameraButton() {
+    return new GestureDetector(
+        onTap: () {
+          //Do something
+          camState = !camState;
+        },
+        child: Center(
+            child: ClipOval(
+          child: Container(
+            color: Colors.white,
+            height: 80.0,
+            width: 80.0,
+            child: Container(
+              decoration: new BoxDecoration(
+                shape: BoxShape.circle,
+                border: new Border.all(
+                  color: Colors.black,
+                  width: 10.0,
                 ),
               ),
-              title: Padding(
-                  padding: EdgeInsets.only(left: 5.0),
-                  child: Text(Util.putaway, style: normalTextStyle)),
-              trailing: Icon(
-                Icons.keyboard_arrow_right,
-              )),
-        ],
-      ),
-    );
+            ),
+          ),
+        )));
+  }
+
+Future<Null> logOutFb() async {
+    await facebookSignIn.logOut();
   }
 
   onLogoutClicked() {
     var auth = AuthService();
     auth.logout();
+    logOutFb();
+    
     Navigator.pushReplacementNamed(context, '/login');
   }
 
   Widget bemeDrawerPage() {
-    return new Drawer();
+    return new Drawer(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Container(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(32.0, 64.0, 32.0, 16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Container(
+                    height: 90.0,
+                    width: 90.0,
+                    child: CircleAvatar(
+                      backgroundImage: (profile_picture != null) ? NetworkImage(profile_picture) : AssetImage("assets/images/default.png"),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      name ??'default value',
+                      style: TextStyle(fontSize: 20.0),
+                    ),
+                  ),
+                  GestureDetector(
+                      onTap: () {
+                        Navigator.pushReplacementNamed(context, '/profile');
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          "See profile",
+                          style: TextStyle(color: Colors.black45),
+                        ),
+                      ))
+                ],
+              ),
+            ),
+          ),
+          Expanded(
+            child: Container(
+              color: Colors.black12,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(40.0, 16.0, 40.0, 40.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        Util.home,
+                        style: TextStyle(fontSize: 18.0),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        Util.privacy_settings,
+                        style: TextStyle(fontSize: 18.0),
+                      ),
+                    ),
+                    Divider(),
+                    GestureDetector(
+                      onTap: () {
+                        onLogoutClicked();
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          Util.logout,
+                          style: TextStyle(fontSize: 18.0, color: Colors.pink),
+                        ),
+                      ),
+                    ),
+                    Divider(),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        Util.about,
+                        style: TextStyle(fontSize: 18.0),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
-// Future<void> _optionsDialogBox() {
-//   return showDialog(context: context,
-//     builder: (BuildContext context) {
-//         return AlertDialog(
-//           content: new SingleChildScrollView(
-//             child: new ListBody(
-//               children: <Widget>[
-//                 GestureDetector(
-//                   child: new Text(Util.take_picture),
-//                   onTap: openCamera,
-//                 ),
-//                 Padding(
-//                   padding: EdgeInsets.all(8.0),
-//                 ),
-//                 GestureDetector(
-//                   child: new Text(Util.select_gallery),
-//                   onTap: openGallery,
-//                 ),
-//               ],
-//             ),
-//           ),
-//         );
-//       });
-// }
+  var scanTextStyle = TextStyle(
+      color: Colors.white, fontFamily: Util.BemeTextRegular, fontSize: 13.5);
 
-
-  var normalTextStyle = TextStyle(
-      color: Colors.grey, fontFamily: Util.BemeBold, fontSize: 14.0);
-
-  var floorTextStyle = TextStyle(
-    color: Colors.grey,
-    fontFamily: Util.BemeRegular,
-    fontSize: 11.0,
-  );
-
-  // var background = (BuildContext context) => new DecorationImage(
-  //     image: new AssetImage("assets/images/background.png"),
-  //     colorFilter:
-  //         ColorFilter.mode(Theme.of(context).primaryColor, BlendMode.overlay),
-  //     fit: BoxFit.cover,
-  //     alignment: Alignment.topCenter);
+  var normalTextStyle =
+      TextStyle(color: Colors.grey, fontFamily: Util.BemeBold, fontSize: 14.0);
 
   Future<String> _getSharedPreferenceString(String key) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString(key);
   }
+
+Future<bool> _removeSharedPreferenceString(String key) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return await prefs.remove(key);
+  }
+
+
 }
