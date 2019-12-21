@@ -8,7 +8,12 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class Profile extends StatelessWidget {
+class Profile extends StatefulWidget {
+  @override
+  _ProfileState createState() => _ProfileState();
+}
+
+class _ProfileState extends State<Profile> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -40,9 +45,6 @@ class Profile extends StatelessWidget {
   var textStyle = TextStyle(
       color: Colors.black, fontFamily: Util.BemeTextRegular, fontSize: 13.5);
 }
-
-
-
 
 class EditProfileScreen extends StatefulWidget {
   @override
@@ -210,7 +212,7 @@ class EditProfileScreenState extends State<EditProfileScreen> {
                   // Email Address
                   new Container(
                     child: new Text(
-                     Util.profile_email,
+                      Util.profile_email,
                       style: normalTextStyle,
                     ),
                     margin:
@@ -219,13 +221,32 @@ class EditProfileScreenState extends State<EditProfileScreen> {
                   new Container(
                     child: new TextFormField(
                       decoration: new InputDecoration(
-                          hintText: 'Please Enter Youur Email Address',
+                          hintText: 'Please Enter Your Email Address',
                           border: new UnderlineInputBorder(),
                           contentPadding: new EdgeInsets.all(5.0),
                           hintStyle: textStyle),
                     ),
                     margin: new EdgeInsets.only(left: 30.0, right: 30.0),
                   ),
+
+                  //Age
+                  new Container(
+                    child: new Text(
+                      Util.profile_age,
+                      style: normalTextStyle,
+                    ),
+                    margin:
+                        new EdgeInsets.only(left: 10.0, top: 30.0, bottom: 5.0),
+                  ),
+                  new Container(
+                      child: new TextFormField(
+                        decoration: new InputDecoration(
+                            hintText: 'Please Enter your Age',
+                            border: new UnderlineInputBorder(),
+                            contentPadding: new EdgeInsets.all(5.0),
+                            hintStyle: textStyle),
+                      ),
+                      margin: new EdgeInsets.only(left: 30.0, right: 30.0)),
 
                   // Address
                   new Container(
@@ -239,22 +260,19 @@ class EditProfileScreenState extends State<EditProfileScreen> {
                   new Container(
                     child: new TextFormField(
                       decoration: new InputDecoration(
-                          hintText: '',
+                          hintText: 'Please Enter Home/Office address',
                           border: new UnderlineInputBorder(),
                           contentPadding: new EdgeInsets.all(5.0),
-                          hintStyle: new TextStyle(color: Colors.grey)),
+                          hintStyle: textStyle),
                     ),
                     margin: new EdgeInsets.only(left: 30.0, right: 30.0),
                   ),
 
-                  // About me
+                  // Address
                   new Container(
                     child: new Text(
-                      'About me',
-                      style: new TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14.0,
-                          color: Colors.amber),
+                      Util.profile_address_two,
+                      style: normalTextStyle,
                     ),
                     margin:
                         new EdgeInsets.only(left: 10.0, top: 30.0, bottom: 5.0),
@@ -262,23 +280,19 @@ class EditProfileScreenState extends State<EditProfileScreen> {
                   new Container(
                     child: new TextFormField(
                       decoration: new InputDecoration(
-                          hintText:
-                              'Fun, like travel, read book and play PES!!!',
+                          hintText: '',
                           border: new UnderlineInputBorder(),
                           contentPadding: new EdgeInsets.all(5.0),
-                          hintStyle: new TextStyle(color: Colors.grey)),
+                          hintStyle: textStyle),
                     ),
                     margin: new EdgeInsets.only(left: 30.0, right: 30.0),
                   ),
 
-                  // About me
+                  // Phone Number
                   new Container(
                     child: new Text(
-                      'Phone',
-                      style: new TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14.0,
-                          color: Colors.amber),
+                      Util.profile_phone,
+                      style: normalTextStyle,
                     ),
                     margin:
                         new EdgeInsets.only(left: 10.0, top: 30.0, bottom: 5.0),
@@ -289,7 +303,7 @@ class EditProfileScreenState extends State<EditProfileScreen> {
                           hintText: '0123456789',
                           border: new UnderlineInputBorder(),
                           contentPadding: new EdgeInsets.all(5.0),
-                          hintStyle: new TextStyle(color: Colors.grey)),
+                          hintStyle: textStyle),
                       keyboardType: TextInputType.number,
                     ),
                     margin: new EdgeInsets.only(left: 30.0, right: 30.0),
@@ -297,10 +311,8 @@ class EditProfileScreenState extends State<EditProfileScreen> {
 
                   // Sex
                   new Container(
-                    child: new Text(
-                      Util.profile_gender,
-                      style: normalTextStyle
-                    ),
+                    child:
+                        new Text(Util.profile_gender, style: normalTextStyle),
                     margin:
                         new EdgeInsets.only(left: 10.0, top: 30.0, bottom: 5.0),
                   ),
@@ -336,7 +348,6 @@ class EditProfileScreenState extends State<EditProfileScreen> {
         ));
   }
 
-
   var scanTextStyle = TextStyle(
       color: Colors.white, fontFamily: Util.BemeTextRegular, fontSize: 15.5);
 
@@ -344,6 +355,5 @@ class EditProfileScreenState extends State<EditProfileScreen> {
       TextStyle(color: Colors.black, fontFamily: Util.BemeBold, fontSize: 14.0);
 
   var textStyle = TextStyle(
-      color: Colors.black, fontFamily: Util.BemeTextRegular, fontSize: 13.5);
-
+      color: Colors.black54, fontFamily: Util.BemeTextRegular, fontSize: 13.5);
 }

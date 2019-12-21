@@ -81,6 +81,8 @@ class Util {
   static const String profile = "Profile";
   static const String update_profile = "Update Profile";
   static const String edit_profile = "Edit Profile";
+  static const String make_up = "Make Up";
+  static const String tone = "Tones";
 
   //Menu 
   static const String home = "Home";
@@ -108,7 +110,7 @@ class Util {
   static const String login_error_description = "Invalid Username/Password or If you registered succesfful, Account May Not activated. Please activate your account..";
   static const String alert_title = "Are you sure?";
   static const String alert_desc = "Do you want to exit an App";
-  static const String default_tap_activity_scan = "Tap to Activity the Scan Your facial";
+  static const String default_tap_activity_scan = "Tap here to start the Scan Your facial";
   static const String already_signin = "Logout Facebook";
 
 

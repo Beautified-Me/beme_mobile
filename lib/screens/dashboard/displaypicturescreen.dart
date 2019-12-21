@@ -1,50 +1,30 @@
-import 'package:Utician/data/user.dart';
-import 'package:Utician/screens/dashboard/DisplayPictureScreen.dart';
 import 'package:Utician/services/auth_service.dart';
 import 'package:Utician/util/util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
-import 'package:camera/camera.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' show join;
 import 'dart:async';
 import 'dart:io';
-import 'package:torch_compat/torch_compat.dart';
 
-List<CameraDescription> cameras;
-
-class Dashboard extends StatefulWidget {
-  final CameraDescription camera;
-  final User userdata;
-  Dashboard({Key key, this.userdata, this.camera}) : super(key: key);
+class DisplayPictureScreen extends StatefulWidget {
+  final String imagePath;
+  const DisplayPictureScreen({Key key, this.imagePath}) : super(key: key);
 
   @override
-  _DashboardState createState() => _DashboardState();
+  _DisplayPictureScreenState createState() => _DisplayPictureScreenState();
 }
 
-class _DashboardState extends State<Dashboard> {
-  static const _kFontFam = 'MyFlutterApp';
-  static const IconData logout = const IconData(0xe800, fontFamily: _kFontFam);
-  bool camState = false;
-
+class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
   String name;
   String email;
   String profile_picture;
-  int selectedCameraIdx;
-
-  CameraController _controller;
-  Future<void> _initCamFuture;
-  File _image;
+  String path;
 
   static final FacebookLogin facebookSignIn = new FacebookLogin();
-
   @override
   void initState() {
     super.initState();
-    _initApp();
 
     _getSharedPreferenceString("name").then((storedName) {
       if (storedName != null) {
@@ -71,41 +51,15 @@ class _DashboardState extends State<Dashboard> {
         });
       }
     });
+
+    _getSharedPreferenceString("imagePath").then((storedCapturePicture) {
+      if (storedCapturePicture != null) {
+        setState(() {
+          path = storedCapturePicture;
+        });
+      }
+    });
   }
-
-  IconData _getCameraLensIcon(CameraLensDirection direction) {
-    switch (direction) {
-      case CameraLensDirection.back:
-        return Icons.camera_rear;
-      case CameraLensDirection.front:
-        return Icons.camera_front;
-      case CameraLensDirection.external:
-        return Icons.camera;
-      default:
-        return Icons.device_unknown;
-    }
-  }
-
-  _initApp() async {
-    final cameras = await availableCameras();
-    //final firstCam = cameras.first;
-    final frontCam = cameras[1];
-
-    _controller = CameraController(
-      frontCam,
-      ResolutionPreset.medium,
-    );
-
-    _initCamFuture = _controller.initialize();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-
 
   Future<bool> _onWillPop() {
     return showDialog(
@@ -131,110 +85,106 @@ class _DashboardState extends State<Dashboard> {
 
   @override
   Widget build(BuildContext context) {
-    return new WillPopScope(
-        onWillPop: _onWillPop,
-        child: Stack(
-          children: <Widget>[
-            new Container(
-                height: double.infinity,
-                width: double.infinity,
-                decoration: BoxDecoration(color: Color(Util.white))),
-            Scaffold(
-                backgroundColor: Colors.transparent,
-                appBar: new AppBar(
-                  backgroundColor: Colors.black,
-                  elevation: 0.0,
-                  iconTheme: new IconThemeData(color: Colors.white),
-                ),
-                drawer: bemeDrawerPage(),
-                body: Column(
-                  children: <Widget>[
-                    Container(
-                      child: accessTabScanning()
-                   
-                    ),
-                    Container(
-                      height: 146,
-                      child: cameraButton(),
-                    )
-                  ],
-                )),
-          ],
-        ));
-  }
-
-  Widget defaultAccessTabCamera() {
-    return new GestureDetector(
-      onTap: () {
-        setState(() {
-          camState = !camState;
-        });
-      },
-      child: Padding(
-        padding: EdgeInsets.all(0.0),
-        child: new Container(
-          width: double.infinity,
-          height: 500,
-          decoration: BoxDecoration(
-              color: Colors.black,
-              shape: BoxShape.rectangle,
-              border: Border(
-                  bottom: BorderSide(width: 0.4, color: Color(Util.black)))),
-          child: Center(
-            child: new Container(
-              padding: const EdgeInsets.all(50.0),
-              decoration: BoxDecoration(
-                color: Colors.black,
-                shape: BoxShape.rectangle,
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Stack(
+        children: <Widget>[
+          new Container(
+              height: double.infinity,
+              width: double.infinity,
+              decoration: BoxDecoration(color: Color(Util.white))),
+          Scaffold(
+              backgroundColor: Colors.transparent,
+              appBar: new AppBar(
+                backgroundColor: Colors.black,
+                elevation: 0.0,
+                iconTheme: new IconThemeData(color: Colors.white),
               ),
-              child: new Text(Util.default_tap_activity_scan,
-                  style: scanTextStyle),
-            ),
-          ),
-        ),
+              drawer: bemeDrawerPage(),
+              body: Column(
+                children: <Widget>[
+                  Container(child: displayFilterPage()),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      makeUpFilter(),
+                      Container(
+                        height: 146,
+                        child: cameraButton(),
+                      ),
+                      toneFilter()
+                    ],
+                  ),
+                ],
+              )),
+        ],
       ),
     );
   }
 
-
-
-  Widget accessTabScanning() {
+  makeUpFilter() {
     return new GestureDetector(
-      onTap: () {
-        setState(() {
-          camState = !camState;
-          print("TODO: Camera initializattion");
-        });
-      },
-      child: new Container(
-        width: double.infinity,
-        height: 500,
-        child: FutureBuilder<void>(
-          future: _initCamFuture,
-          builder: (context, snapshot) {
-            return CameraPreview(_controller);
-          },
-        ),
+        onTap: () {},
+        child: Column(
+          children: <Widget>[
+            Container(
+              width: 40,
+              height: 40,
+              child: Image.asset(
+                'assets/images/makeup.png',
+              ),
+            ),
+            SizedBox(height: 10),
+            Text(Util.make_up, style: scanTextStyle)
+          ],
+        ));
+  }
+
+  toneFilter() {
+    return new GestureDetector(
+      onTap: () {},
+      child: Column(
+        children: <Widget>[
+          Container(
+            width: 40,
+            height: 40,
+            child: Image.asset(
+              'assets/images/color.png',
+            ),
+          ),
+          SizedBox(height: 10),
+          Text(Util.tone, style: scanTextStyle)
+        ],
       ),
+    );
+  }
+
+  displayFilterPage() {
+    return new Stack(
+      children: <Widget>[
+        Container(
+          width: double.infinity,
+          height: 480,
+          child: Image.file(File(path)),
+        ),
+        Positioned(
+          bottom: 10.0,
+          right: 10.0,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Container(
+              child: new Text(Util.appName, style: titleStyle),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
   cameraButton() {
     return new GestureDetector(
         onTap: () async {
-          print("ontap tap tap");
-          await _initCamFuture;
-          final path = join((await getTemporaryDirectory()). path,'${DateTime.now()}.png');
-          await _controller.takePicture(path);
-          _setSharedPreferenceString("imagePath", path );
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => DisplayPictureScreen(imagePath: path),
-              ),
-            );
-          
-        
+          Navigator.pushNamed(context, '/dashboard');
         },
         child: Center(
             child: ClipOval(
@@ -381,18 +331,14 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
+  var titleStyle =
+      TextStyle(color: Colors.white60, fontFamily: Util.BemeLogo, fontSize: 30);
+
   var scanTextStyle = TextStyle(
-      color: Colors.white, fontFamily: Util.BemeTextRegular, fontSize: 13.5);
+      color: Colors.black, fontFamily: Util.BemeTextRegular, fontSize: 13.5);
 
   var normalTextStyle =
       TextStyle(color: Colors.grey, fontFamily: Util.BemeBold, fontSize: 14.0);
-
-
-      
-  Future<bool> _setSharedPreferenceString(String key, String value) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    return await prefs.setString(key, value);
-  }
 
   Future<String> _getSharedPreferenceString(String key) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -404,3 +350,4 @@ class _DashboardState extends State<Dashboard> {
     return await prefs.remove(key);
   }
 }
+  
