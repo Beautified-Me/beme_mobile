@@ -7,7 +7,7 @@ import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Onboarding extends StatefulWidget {
-  final SharedPreferences prefs;
+ final SharedPreferences prefs; 
 
   final List<Onboard> pages = [
     Onboard(

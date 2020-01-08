@@ -24,6 +24,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert' as JSON;
 
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:logger/logger.dart';
+
 
 class Login extends StatefulWidget {
   @override
@@ -36,6 +38,7 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
   EmailTextFieldIcon _emailField;
   bool _isInAsyncCall = false;
   static final FacebookLogin facebookSignIn = new FacebookLogin();
+  var logger = Logger();
 
   final TextEditingController _username = new TextEditingController();
   final TextEditingController _email = new TextEditingController();
@@ -50,6 +53,8 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
   StreamSubscription<ConnectivityResult> subscription;
   TabController _controller;
   bool isLoggedIn = false;
+  final prefs =  SharedPreferences.getInstance();
+
 
   final AndroidIntent intent = new AndroidIntent(
       action: 'android.settings.ACTION_WIFI_SETTINGS',
@@ -100,7 +105,7 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
     subscription =
         connectivity.onConnectivityChanged.listen((ConnectivityResult result) {
       _connectionStatus = result.toString();
-      print(_connectionStatus);
+      logger.d(_connectionStatus);
       if (result == ConnectivityResult.none) {
         setState(() {
           showInSnackBar(Util.network_error, context);
@@ -114,6 +119,12 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
     return await prefs.setString(key, value);
   }
 
+  
+  Future<bool> _setSharedPreferenceBool(String key, bool value) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return await prefs.setBool(key, value);
+  }
+
   Future<Null> loginFb() async {
     final FacebookLoginResult result =
         await facebookSignIn.logIn(['email', 'public_profile']);
@@ -124,7 +135,7 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
         var graphResponse = await http.get(
             'https://graph.facebook.com/v2.12/me?fields=name,picture.width(800).height(800),first_name,last_name,email&access_token=${token}');
         var profile = JSON.jsonDecode(graphResponse.body);
-        print(
+        logger.d(
             '${profile['id']}\n${profile['name']}\n${profile['email']}\n${profile['picture']['data']['url']}",');
         
         String id = '${profile['id']}';
@@ -142,18 +153,19 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
       _setSharedPreferenceString("email", email);
       _setSharedPreferenceString("profilePicture", profilepic);
 
-        Navigator.push(context,
-            MaterialPageRoute(builder: (context) => Dashboard(userdata: user)));
+        // Navigator.push(context,
+        //     MaterialPageRoute(builder: (context) => Dashboard(userdata: user)));
+        _controller.animateTo((_controller.index + 1) % 2);
         _isInAsyncCall = false;
 
         
         break;
       case FacebookLoginStatus.cancelledByUser:
-        print('Login cancelled by the user.');
+        logger.d('Login cancelled by the user.');
 
         break;
       case FacebookLoginStatus.error:
-        print('Something went wrong with the login process.\n'
+        logger.d('Something went wrong with the login process.\n'
             'Here\'s the error Facebook gave us: ${result.errorMessage}');
         break;
     }
@@ -164,12 +176,12 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
   initConnectionState() async {
     String connection;
     try {
-      final result = await InternetAddress.lookup(Util.BASE_DEVELOPMENT_URL);
+      final result = await InternetAddress.lookup(Util.BASE_URL);
       if (result.isEmpty && result[0].rawAddress.isEmpty) {
         connection = Util.network_error;
       }
     } on SocketException catch (_) {
-      print(Util.network_error);
+      logger.d(Util.network_error);
     }
 
     if (!mounted) return;
@@ -445,14 +457,17 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
   onLoginPressed() {
     var auth = AuthService();
     auth.login(_username.text, _password.text).then((loginsuccess) {
+      
       if (loginsuccess) {
-        print('login success');
+        logger.d('login success');
+        _setSharedPreferenceString("default_username", _username.text);
+        _setSharedPreferenceBool("seen", loginsuccess);
         Navigator.pushNamed(context, '/dashboard');
         setState(() {
           _isInAsyncCall = false;
         });
       } else {
-        print('login failed');
+        logger.d('login failed');
         alertLoginDialog();
         setState(() {
           _isInAsyncCall = false;
@@ -467,12 +482,13 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
         .postAuthRegisteration(_username.text, _email.text, _password.text)
         .then((registerSuccess) {
       if (registerSuccess == null) {
+        _setSharedPreferenceString("default_username", _username.text);
         alertRegisterDialog();
         setState(() {
           _isInAsyncCall = false;
         });
       } else {
-        print("Registeration: OK");
+        logger.d("Registeration: OK");
         successDialog(registerSuccess.message.toString());
         _controller.animateTo((_controller.index + 1) % 2);
         setState(() {
@@ -486,7 +502,7 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
     showDialog(
         context: context,
         builder: (BuildContext context) => CustomDialog(
-              title: Util.congrutulation + " " + _username.text,
+              title: Util.congrutulation +""+ _username.text,
               description: Util.message_activation,
               buttonText: Util.ok,
               icon: Icons.email,

@@ -6,6 +6,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'dart:async';
 import 'dart:io';
+import 'package:photofilters/photofilters.dart';
+import 'package:image/image.dart' as imageLib;
+import 'package:image_picker/image_picker.dart';
 
 class DisplayPictureScreen extends StatefulWidget {
   final String imagePath;
@@ -16,10 +19,15 @@ class DisplayPictureScreen extends StatefulWidget {
 }
 
 class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
+  //imageLib.Image _image;
   String name;
   String email;
   String profile_picture;
   String path;
+  String username;
+  Filter _filter;
+  // List<Filter> filters = presetFitersList;
+  String fileName;
 
   static final FacebookLogin facebookSignIn = new FacebookLogin();
   @override
@@ -56,6 +64,14 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
       if (storedCapturePicture != null) {
         setState(() {
           path = storedCapturePicture;
+        });
+      }
+    });
+
+       _getSharedPreferenceString("default_username").then((storedUsername) {
+      if (storedUsername != null) {
+        setState(() {
+          username = storedUsername;
         });
       }
     });
@@ -140,9 +156,20 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
         ));
   }
 
+//ToneFilter 
   toneFilter() {
     return new GestureDetector(
-      onTap: () {},
+      onTap: () {
+        //TODO:
+        print('test');
+        new PhotoFilterSelector(
+          filename: null,
+          filters: presetFiltersList,
+          image: null,
+          loader: Center(child: CircularProgressIndicator()),
+          title: null,
+        );
+      },
       child: Column(
         children: <Widget>[
           Container(
@@ -240,7 +267,7 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      name ?? 'default value',
+                      name ?? username,
                       style: TextStyle(fontSize: 20.0),
                     ),
                   ),
@@ -350,4 +377,3 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
     return await prefs.remove(key);
   }
 }
-  

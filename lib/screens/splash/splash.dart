@@ -1,25 +1,50 @@
 import 'dart:async';
 
-import 'package:Utician/screens/login/index.dart';
+import 'package:Utician/screens/dashboard/index.dart';
 import 'package:Utician/screens/onboard/index.dart';
 import 'package:Utician/util/util.dart';
 import "package:flutter/material.dart";
-
+import 'package:logger/logger.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Splash extends StatefulWidget {
-
   @override
   _SplashState createState() => _SplashState();
 }
 
 class _SplashState extends State<Splash> {
+  String token;
+  var logger = Logger();
+  //check whether it's first time
+
+  Future checkFirstSeen() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool _seen = prefs.getBool('seen') ?? false;
+    
+    if (_seen) {
+      Navigator.of(context).pushReplacement(
+          new MaterialPageRoute(builder: (context) => new Dashboard()));
+    } else {
+      prefs.setBool('seen', false);
+      Navigator.of(context).pushReplacement(
+          new MaterialPageRoute(builder: (context) => new Onboarding()));
+    }
+
+  }
+
+
+
   @override
   void initState() {
     super.initState();
-    Timer(
-        Duration(seconds: Util.bemeSplash),
-        () => Navigator.of(context).pushReplacement(MaterialPageRoute(
-            builder: (BuildContext context) => Onboarding())));
+    // Timer(
+    //     Duration(seconds: Util.bemeSplash),
+    //     () => Navigator.of(context).pushReplacement(
+    //             MaterialPageRoute(builder: (BuildContext context) {
+    //           return Onboarding();
+    //         })));
+
+    Timer(Duration(seconds: Util.bemeSplash), () => checkFirstSeen());
   }
 
   @override
@@ -40,8 +65,6 @@ class _SplashState extends State<Splash> {
               ],
             )));
   }
-
-  
 
   Widget title() {
     return Row(
@@ -66,4 +89,9 @@ class _SplashState extends State<Splash> {
       color: Colors.black,
       fontFamily: Util.BemeRegular,
       fontSize: Util.bemeSubSize);
+
+  Future<String> _getSharedPreferenceString(String key) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString(key);
+  }
 }

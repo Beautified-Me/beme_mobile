@@ -1,19 +1,54 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:Utician/services/http_service.dart';
 import 'package:Utician/util/util.dart';
+import 'package:Utician/widgets/primary_button/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:logger/logger.dart';
 
 class Profile extends StatefulWidget {
   @override
   _ProfileState createState() => _ProfileState();
 }
 
-class _ProfileState extends State<Profile> {
+class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
+  final _profileKey = GlobalKey<FormState>();
+  bool _isInAsyncCall = false;
+
+  String name, email, profile_picture, username;
+
+  final TextEditingController _username = new TextEditingController();
+  final TextEditingController _age = new TextEditingController();
+  final TextEditingController _email = new TextEditingController();
+  final TextEditingController _address1 = new TextEditingController();
+  final TextEditingController _address2 = new TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    _getSharedPreferenceString("profilePicture").then((storedPicture) {
+      if (storedPicture != null) {
+        setState(() {
+          profile_picture = storedPicture;
+        });
+      }
+    });
+
+    _getSharedPreferenceString("default_username").then((storedUsername) {
+      if (storedUsername != null) {
+        setState(() {
+          username = storedUsername;
+        });
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -25,6 +60,17 @@ class _ProfileState extends State<Profile> {
           Util.profile,
           style: scanTextStyle,
         ),
+        actions: <Widget>[
+          // IconButton(
+          //   icon: Icon(
+          //     Icons.done,
+          //     color: Colors.white,
+          //   ),
+          //   onPressed: () {
+          //     updateProfileButton();
+          //   },
+          // )
+        ],
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () =>
@@ -34,6 +80,13 @@ class _ProfileState extends State<Profile> {
       ),
       body: new EditProfileScreen(),
     );
+  }
+
+
+
+  Future<String> _getSharedPreferenceString(String key) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString(key);
   }
 
   var scanTextStyle = TextStyle(
@@ -53,7 +106,10 @@ class EditProfileScreen extends StatefulWidget {
 
 class EditProfileScreenState extends State<EditProfileScreen> {
   File avatarImageFile, backgroundImageFile;
-  String sex;
+  String sex, name, email, address1, address2;
+
+  final TextEditingController _username = new TextEditingController();
+  final TextEditingController _email = new TextEditingController();
 
   Future getImage(bool isAvatar) async {
     var result = await ImagePicker.pickImage(source: ImageSource.gallery);
@@ -86,6 +142,48 @@ class EditProfileScreenState extends State<EditProfileScreen> {
           ),
         ) ??
         false;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    _getSharedPreferenceString("name").then((storedName) {
+      if (storedName != null) {
+        setState(() {
+          name = storedName;
+          print("name" + name);
+        });
+      }
+    });
+
+    _getSharedPreferenceString("email").then((storedEmail) {
+      if (storedEmail != null) {
+        setState(() {
+          email = storedEmail;
+          print("email" + email);
+        });
+      }
+    });
+
+    
+  }
+
+  updateProfileButton() {
+    return new PrimaryButton(
+      buttonName: Util.update_profile,
+      highlightColor: Colors.black,
+      buttonColor: Color(Util.black),
+      buttonTextStyle:
+          TextStyle(color: Color(Util.white), fontFamily: Util.BemeLight),
+      onPressed: () {
+        //TODO:
+        var http = HttpService();
+        http.postApiUserProfile(name, email, address1, address2, age, phonenumber, sex).then(sucessProfile)
+
+      
+      },
+    );
   }
 
   @override
@@ -138,34 +236,42 @@ class EditProfileScreenState extends State<EditProfileScreen> {
                       top: 5.0,
                     ),
 
-                    // Avatar and button
+                    // Avatar and button Profile Picture
                     new Positioned(
                       child: new Stack(
                         children: <Widget>[
                           (avatarImageFile == null)
                               ? new Container(
-                                  width: 70.0,
-                                  height: 70.0,
+                                  width: 100.0,
+                                  height: 100.0,
                                   child: CircleAvatar(
                                     backgroundImage:
                                         AssetImage("assets/images/default.png"),
                                   ))
                               : new Material(
-                                  child: new Image.file(
-                                    avatarImageFile,
-                                    width: 70.0,
-                                    height: 70.0,
-                                    fit: BoxFit.cover,
+                                  // child: new Image.file(
+                                  //   avatarImageFile,
+                                  //   width: 70.0,
+                                  //   height: 70.0,
+                                  //   fit: BoxFit.cover,
+                                  // ),
+                                  child: Container(
+                                    width: 100.0,
+                                    height: 100.0,
+                                    child: CircleAvatar(
+                                      backgroundImage:
+                                          new FileImage(avatarImageFile),
+                                    ),
                                   ),
                                   borderRadius: new BorderRadius.all(
-                                      new Radius.circular(40.0)),
+                                      new Radius.circular(60.0)),
                                 ),
                           new Material(
                             child: new IconButton(
                               icon: new Image.asset(
                                 'images/ic_camera.png',
-                                width: 40.0,
-                                height: 40.0,
+                                width: 100.0,
+                                height: 100.0,
                                 fit: BoxFit.cover,
                               ),
                               onPressed: () => getImage(true),
@@ -174,8 +280,8 @@ class EditProfileScreenState extends State<EditProfileScreen> {
                               iconSize: 70.0,
                             ),
                             borderRadius:
-                                new BorderRadius.all(new Radius.circular(40.0)),
-                            color: Colors.grey.withOpacity(0.5),
+                                new BorderRadius.all(new Radius.circular(60.0)),
+                            color: Colors.grey.withOpacity(0.0),
                           ),
                         ],
                       ),
@@ -200,8 +306,9 @@ class EditProfileScreenState extends State<EditProfileScreen> {
                   ),
                   new Container(
                     child: new TextFormField(
+                      controller: _username,
                       decoration: new InputDecoration(
-                          hintText: 'Please Enter Your Name',
+                          hintText: name ?? 'Please Enter Your Name',
                           border: new UnderlineInputBorder(),
                           contentPadding: new EdgeInsets.all(5.0),
                           hintStyle: textStyle),
@@ -221,7 +328,7 @@ class EditProfileScreenState extends State<EditProfileScreen> {
                   new Container(
                     child: new TextFormField(
                       decoration: new InputDecoration(
-                          hintText: 'Please Enter Your Email Address',
+                          hintText: email  ??'Please Enter Your Email Address',
                           border: new UnderlineInputBorder(),
                           contentPadding: new EdgeInsets.all(5.0),
                           hintStyle: textStyle),
@@ -338,7 +445,7 @@ class EditProfileScreenState extends State<EditProfileScreen> {
                       style: new TextStyle(color: Colors.black),
                     ),
                     margin: new EdgeInsets.only(left: 50.0),
-                  )
+                  ),
                 ],
                 crossAxisAlignment: CrossAxisAlignment.start,
               )
@@ -356,4 +463,9 @@ class EditProfileScreenState extends State<EditProfileScreen> {
 
   var textStyle = TextStyle(
       color: Colors.black54, fontFamily: Util.BemeTextRegular, fontSize: 13.5);
+
+  Future<String> _getSharedPreferenceString(String key) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString(key);
+  }
 }

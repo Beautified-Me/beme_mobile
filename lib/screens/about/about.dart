@@ -14,6 +14,7 @@ class _AboutState extends State<About> {
   String name;
   String email;
   String profile_picture;
+  String username;
 
   static final FacebookLogin facebookSignIn = new FacebookLogin();
 
@@ -43,6 +44,14 @@ class _AboutState extends State<About> {
       if (storedPicture != null) {
         setState(() {
           profile_picture = storedPicture;
+        });
+      }
+    });
+
+    _getSharedPreferenceString("default_username").then((storedUsername) {
+      if (storedUsername != null) {
+        setState(() {
+          username = storedUsername;
         });
       }
     });

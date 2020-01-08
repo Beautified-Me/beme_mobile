@@ -25,15 +25,19 @@ class Dashboard extends StatefulWidget {
   _DashboardState createState() => _DashboardState();
 }
 
-class _DashboardState extends State<Dashboard> {
+class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMixin {
   static const _kFontFam = 'MyFlutterApp';
   static const IconData logout = const IconData(0xe800, fontFamily: _kFontFam);
   bool camState = false;
+  AnimationController _animationController;
 
   String name;
   String email;
   String profile_picture;
   int selectedCameraIdx;
+  String username;
+  Timer _timer;
+  int _start = 3;
 
   CameraController _controller;
   Future<void> _initCamFuture;
@@ -43,6 +47,11 @@ class _DashboardState extends State<Dashboard> {
 
   @override
   void initState() {
+
+    _animationController =
+          new AnimationController(vsync: this, duration: Duration(seconds: 1));
+      _animationController.repeat();
+
     super.initState();
     _initApp();
 
@@ -71,7 +80,47 @@ class _DashboardState extends State<Dashboard> {
         });
       }
     });
+
+
+   _getSharedPreferenceString("default_username").then((storedUsername) {
+      if (storedUsername != null) {
+        setState(() {
+          username = storedUsername;
+        });
+      }
+    });
+
+ 
   }
+
+@override
+void dispose() {
+  _timer.cancel();
+  _controller.dispose();
+  super.dispose();
+}
+
+
+
+void startTimer() {
+  const oneSec = const Duration(seconds: 1);
+  _timer = new Timer.periodic(
+    oneSec,
+    (Timer timer) => setState(
+      () {
+        if (_start < 1) {
+          timer.cancel();
+        } else {
+          _start = _start - 1;
+        }
+      },
+    ),
+  );
+}
+
+
+  
+
 
   IconData _getCameraLensIcon(CameraLensDirection direction) {
     switch (direction) {
@@ -97,12 +146,6 @@ class _DashboardState extends State<Dashboard> {
     );
 
     _initCamFuture = _controller.initialize();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
   }
 
 
@@ -149,10 +192,7 @@ class _DashboardState extends State<Dashboard> {
                 drawer: bemeDrawerPage(),
                 body: Column(
                   children: <Widget>[
-                    Container(
-                      child: accessTabScanning()
-                   
-                    ),
+                    Container(child: accessTabScanning()),
                     Container(
                       height: 146,
                       child: cameraButton(),
@@ -185,6 +225,7 @@ class _DashboardState extends State<Dashboard> {
               padding: const EdgeInsets.all(50.0),
               decoration: BoxDecoration(
                 color: Colors.black,
+            
                 shape: BoxShape.rectangle,
               ),
               child: new Text(Util.default_tap_activity_scan,
@@ -195,8 +236,6 @@ class _DashboardState extends State<Dashboard> {
       ),
     );
   }
-
-
 
   Widget accessTabScanning() {
     return new GestureDetector(
@@ -212,7 +251,15 @@ class _DashboardState extends State<Dashboard> {
         child: FutureBuilder<void>(
           future: _initCamFuture,
           builder: (context, snapshot) {
-            return CameraPreview(_controller);
+            //return CameraPreview(_controller);
+            if (snapshot.connectionState == ConnectionState.done) {
+              // If the Future is complete, display the preview.
+              return CameraPreview(_controller);
+            } else {
+              // Otherwise, display a loading indicator.
+              // return Center(child: CircularProgressIndicator());
+              return defaultAccessTabCamera();
+            }
           },
         ),
       ),
@@ -223,18 +270,18 @@ class _DashboardState extends State<Dashboard> {
     return new GestureDetector(
         onTap: () async {
           print("ontap tap tap");
+          startTimer();
           await _initCamFuture;
-          final path = join((await getTemporaryDirectory()). path,'${DateTime.now()}.png');
+          final path = join(
+              (await getTemporaryDirectory()).path, '${DateTime.now()}.png');
           await _controller.takePicture(path);
-          _setSharedPreferenceString("imagePath", path );
+          _setSharedPreferenceString("imagePath", path);
           Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => DisplayPictureScreen(imagePath: path),
-              ),
-            );
-          
-        
+            context,
+            MaterialPageRoute(
+              builder: (context) => DisplayPictureScreen(imagePath: path),
+            ),
+          );
         },
         child: Center(
             child: ClipOval(
@@ -250,6 +297,7 @@ class _DashboardState extends State<Dashboard> {
                   width: 10.0,
                 ),
               ),
+              // child: Text("$_start", style: TextStyle(fontSize: 30.0)),
             ),
           ),
         )));
@@ -290,7 +338,7 @@ class _DashboardState extends State<Dashboard> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      name ?? 'default value',
+                      name ?? username,
                       style: TextStyle(fontSize: 20.0),
                     ),
                   ),
@@ -387,8 +435,6 @@ class _DashboardState extends State<Dashboard> {
   var normalTextStyle =
       TextStyle(color: Colors.grey, fontFamily: Util.BemeBold, fontSize: 14.0);
 
-
-      
   Future<bool> _setSharedPreferenceString(String key, String value) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return await prefs.setString(key, value);

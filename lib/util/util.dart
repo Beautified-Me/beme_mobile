@@ -1,6 +1,7 @@
 class Util {
+  
   //URL Production
-  static const BASE_URL = "URL PRODUCTION";
+  static const BASE_URL = "http://149.129.36.47:3000";
 
   //URL Development/Staging
   static const BASE_DEVELOPMENT_URL = "http://35.240.205.140:3000";
@@ -11,7 +12,9 @@ class Util {
   static const ENDPOINT_AUTH_LOGIN = "/auth/login";
   static const ENDPOINT_AUTH_REGISTER  = '/auth/register';
   static const ENDPOINT_AUTH_FORGOTPASSWORD = '/auth/forgotPassword';
-  static const ENDPOINT_AUTH_RESETPASSWORD = '/auth/resetPassword';
+  static const ENDPOINT_AUTH_RESETPASSWORD = '/api/resetPassword';
+  static const ENDPOINT_API_PROFILEPROFILE = '/api/profilePicture';
+  static const ENDPOINT_API_USERPROFILE = '/api/user';
 
   //Get EndPoint
   static const ENDPOINT_API_COLOR = "/api/colour";
@@ -19,7 +22,7 @@ class Util {
   static const ENDPOINT_API_PRODUCTYPE= '/api/productType';
   static const ENDPOINT_API_USER = '/api/user';
   static const ENDPOINT_API_PRODUCTSEARCH ='/api/productSearch';
-  static const ENDPOINT_API_PRODUCTSEARCH_BY_OBJECT ='api/productSearchByObject';
+  static const ENDPOINT_API_PRODUCTSEARCH_BY_OBJECT ='/api/productSearchByObject';
 
   //Menu
   static const String history = "History";
@@ -64,10 +67,12 @@ class Util {
   static const String network_good = "Back Online";
   static const String email = 'E-mail Address';
   static const String forget_password_title = "Please Type your Current UserName and Email. We will send temporary password to your email address.";
+  static const String reset_password_title = "Reset your password. Please ensure your current password correct and new password ";
   static const String current_password = "Current Password";
   static const String new_password = "New Password";
   static const String new_password_again = "Confirm New Password";
   static const String forget_password_button = "Recover Password";
+  static const String reset_password_button = "Update New Password";
   static const String loading = "Loading";
   static const String please_try_again = "Please enter your credential and Try Again";
   static const String congrutulation = "Congratulation";
@@ -83,11 +88,12 @@ class Util {
   static const String edit_profile = "Edit Profile";
   static const String make_up = "Make Up";
   static const String tone = "Tones";
+  static const String reset_password_alert = "Password reset failed. Please contact admin";
 
   //Menu 
   static const String home = "Home";
   static const String see_profile =  "See profile";
-  static const String privacy_settings = "Privacy Settings";
+  static const String privacy_settings = "Change Password";
   static const String about = "About";
 
   
