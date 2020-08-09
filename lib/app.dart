@@ -18,7 +18,10 @@ final appRoutes = <String, WidgetBuilder>{
   '/dashboard' : (BuildContext context) => Scaffold(body: Dashboard()),
   '/profile' : (BuildContext context) => Scaffold(body: Profile()),
   '/about' : (BuildContext context) => Scaffold(body: About()),
-  '/setting' : (BuildContext context) => Scaffold(body: Setting()) 
+  '/setting' : (BuildContext context) => Scaffold(body: Setting()),
+  '/makeupfilter': (BuildContext context) => Scaffold(body: MakeUpFilterScreen()),
+  '/toneFilter' : (BuildContext context) => Scaffold(body: ToneFilterScreen())
+
 };
 
 class App extends StatelessWidget {

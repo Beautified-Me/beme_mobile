@@ -311,7 +311,7 @@ void startTimer() {
     var auth = AuthService();
     auth.logout();
     logOutFb();
-
+    _removeSharedPreferenceString('seen');
     Navigator.pushReplacementNamed(context, '/login');
   }
 

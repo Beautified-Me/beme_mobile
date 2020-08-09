@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:logger/logger.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class Profile extends StatefulWidget {
   @override
@@ -21,12 +22,6 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
   bool _isInAsyncCall = false;
 
   String name, email, profile_picture, username;
-
-  final TextEditingController _username = new TextEditingController();
-  final TextEditingController _age = new TextEditingController();
-  final TextEditingController _email = new TextEditingController();
-  final TextEditingController _address1 = new TextEditingController();
-  final TextEditingController _address2 = new TextEditingController();
 
   @override
   void initState() {
@@ -60,17 +55,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
           Util.profile,
           style: scanTextStyle,
         ),
-        actions: <Widget>[
-          // IconButton(
-          //   icon: Icon(
-          //     Icons.done,
-          //     color: Colors.white,
-          //   ),
-          //   onPressed: () {
-          //     updateProfileButton();
-          //   },
-          // )
-        ],
+        actions: <Widget>[],
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () =>
@@ -81,8 +66,6 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
       body: new EditProfileScreen(),
     );
   }
-
-
 
   Future<String> _getSharedPreferenceString(String key) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -106,10 +89,16 @@ class EditProfileScreen extends StatefulWidget {
 
 class EditProfileScreenState extends State<EditProfileScreen> {
   File avatarImageFile, backgroundImageFile;
-  String sex, name, email, address1, address2;
+  String sex, name, email, age, phonenumber, address1, address2;
 
   final TextEditingController _username = new TextEditingController();
+  final TextEditingController _age = new TextEditingController();
   final TextEditingController _email = new TextEditingController();
+  final TextEditingController _address1 = new TextEditingController();
+  final TextEditingController _address2 = new TextEditingController();
+  final TextEditingController _phonenumber = new TextEditingController();
+
+  bool edit;
 
   Future getImage(bool isAvatar) async {
     var result = await ImagePicker.pickImage(source: ImageSource.gallery);
@@ -165,8 +154,6 @@ class EditProfileScreenState extends State<EditProfileScreen> {
         });
       }
     });
-
-    
   }
 
   updateProfileButton() {
@@ -179,12 +166,46 @@ class EditProfileScreenState extends State<EditProfileScreen> {
       onPressed: () {
         //TODO:
         var http = HttpService();
-        http.postApiUserProfile(name, email, address1, address2, age, phonenumber, sex).then(sucessProfile)
-
-      
+        http
+            .postApiUserProfile(
+                name, email, address1, address2, age, phonenumber, sex)
+            .then((sucessProfile) {
+          if (sucessProfile != null) {
+            Fluttertoast.showToast(
+                msg: Util.profile_udpated,
+                toastLength: Toast.LENGTH_SHORT,
+                gravity: ToastGravity.CENTER,
+                timeInSecForIos: 1,
+                backgroundColor: Colors.red,
+                textColor: Colors.white,
+                fontSize: 16.0);
+          } else {
+            Fluttertoast.showToast(
+                msg: Util.profile_please_try_again,
+                toastLength: Toast.LENGTH_SHORT,
+                gravity: ToastGravity.CENTER,
+                timeInSecForIos: 1,
+                backgroundColor: Colors.red,
+                textColor: Colors.white,
+                fontSize: 16.0);
+          }
+        });
       },
     );
   }
+
+  editProfileButton(){
+    return new PrimaryButton(
+        buttonName: Util.update_profile,
+      highlightColor: Colors.black,
+      buttonColor: Color(Util.black),
+      buttonTextStyle:
+          TextStyle(color: Color(Util.white), fontFamily: Util.BemeLight),
+      onPressed: () {
+      }
+
+    );
+  } 
 
   @override
   Widget build(BuildContext context) {
@@ -306,13 +327,25 @@ class EditProfileScreenState extends State<EditProfileScreen> {
                   ),
                   new Container(
                     child: new TextFormField(
-                      controller: _username,
-                      decoration: new InputDecoration(
-                          hintText: name ?? 'Please Enter Your Name',
-                          border: new UnderlineInputBorder(),
-                          contentPadding: new EdgeInsets.all(5.0),
-                          hintStyle: textStyle),
-                    ),
+                          controller: _username,
+                          onSaved: (String value) {
+                            name = value;
+                          },
+                          decoration: new InputDecoration(
+                              labelText: 'Please Enter Your Name',
+                              labelStyle: textStyle,
+                              hintText: _username.text,
+                              border: new UnderlineInputBorder(),
+                              contentPadding: new EdgeInsets.all(5.0),
+                              hintStyle: textStyle),
+                        ) ??
+                        Text(
+                          name,
+                          style: TextStyle(
+                            decoration: TextDecoration.underline,
+                            decorationStyle: TextDecorationStyle.wavy,
+                          ),
+                        ),
                     margin: new EdgeInsets.only(left: 30.0, right: 30.0),
                   ),
 
@@ -327,12 +360,21 @@ class EditProfileScreenState extends State<EditProfileScreen> {
                   ),
                   new Container(
                     child: new TextFormField(
-                      decoration: new InputDecoration(
-                          hintText: email  ??'Please Enter Your Email Address',
-                          border: new UnderlineInputBorder(),
-                          contentPadding: new EdgeInsets.all(5.0),
-                          hintStyle: textStyle),
-                    ),
+                          controller: _email,
+                          decoration: new InputDecoration(
+                              labelText: 'Please Enter Your Email Address',
+                              labelStyle: textStyle,
+                              //hintText: email ?? _email.text,
+                              border: new UnderlineInputBorder(),
+                              contentPadding: new EdgeInsets.all(5.0),
+                              hintStyle: textStyle),
+                        ) ??
+                        Text(
+                          email,
+                          style: TextStyle(
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
                     margin: new EdgeInsets.only(left: 30.0, right: 30.0),
                   ),
 
@@ -347,12 +389,14 @@ class EditProfileScreenState extends State<EditProfileScreen> {
                   ),
                   new Container(
                       child: new TextFormField(
-                        decoration: new InputDecoration(
-                            hintText: 'Please Enter your Age',
-                            border: new UnderlineInputBorder(),
-                            contentPadding: new EdgeInsets.all(5.0),
-                            hintStyle: textStyle),
-                      ),
+                            controller: _age,
+                            decoration: new InputDecoration(
+                                hintText: 'Please Enter your Age',
+                                border: new UnderlineInputBorder(),
+                                contentPadding: new EdgeInsets.all(5.0),
+                                hintStyle: textStyle),
+                          ) ??
+                          Text(email, style: underTextStyle),
                       margin: new EdgeInsets.only(left: 30.0, right: 30.0)),
 
                   // Address
@@ -366,12 +410,14 @@ class EditProfileScreenState extends State<EditProfileScreen> {
                   ),
                   new Container(
                     child: new TextFormField(
-                      decoration: new InputDecoration(
-                          hintText: 'Please Enter Home/Office address',
-                          border: new UnderlineInputBorder(),
-                          contentPadding: new EdgeInsets.all(5.0),
-                          hintStyle: textStyle),
-                    ),
+                          controller: _address1,
+                          decoration: new InputDecoration(
+                              hintText: 'Please Enter Home/Office address',
+                              border: new UnderlineInputBorder(),
+                              contentPadding: new EdgeInsets.all(5.0),
+                              hintStyle: textStyle),
+                        ) ??
+                        Text(_address1.text, style: underTextStyle),
                     margin: new EdgeInsets.only(left: 30.0, right: 30.0),
                   ),
 
@@ -386,12 +432,14 @@ class EditProfileScreenState extends State<EditProfileScreen> {
                   ),
                   new Container(
                     child: new TextFormField(
-                      decoration: new InputDecoration(
-                          hintText: '',
-                          border: new UnderlineInputBorder(),
-                          contentPadding: new EdgeInsets.all(5.0),
-                          hintStyle: textStyle),
-                    ),
+                          controller: _address2,
+                          decoration: new InputDecoration(
+                              hintText: '',
+                              border: new UnderlineInputBorder(),
+                              contentPadding: new EdgeInsets.all(5.0),
+                              hintStyle: textStyle),
+                        ) ??
+                        Text(_address2.text, style: underTextStyle),
                     margin: new EdgeInsets.only(left: 30.0, right: 30.0),
                   ),
 
@@ -406,13 +454,15 @@ class EditProfileScreenState extends State<EditProfileScreen> {
                   ),
                   new Container(
                     child: new TextFormField(
-                      decoration: new InputDecoration(
-                          hintText: '0123456789',
-                          border: new UnderlineInputBorder(),
-                          contentPadding: new EdgeInsets.all(5.0),
-                          hintStyle: textStyle),
-                      keyboardType: TextInputType.number,
-                    ),
+                          controller: _phonenumber,
+                          decoration: new InputDecoration(
+                              hintText: '0123456789',
+                              border: new UnderlineInputBorder(),
+                              contentPadding: new EdgeInsets.all(5.0),
+                              hintStyle: textStyle),
+                          keyboardType: TextInputType.number,
+                        ) ??
+                        Text(_phonenumber.text, style: underTextStyle),
                     margin: new EdgeInsets.only(left: 30.0, right: 30.0),
                   ),
 
@@ -425,35 +475,50 @@ class EditProfileScreenState extends State<EditProfileScreen> {
                   ),
                   new Container(
                     child: new DropdownButton<String>(
-                      items: <String>['Male', 'Female'].map((String value) {
-                        return new DropdownMenuItem<String>(
-                          value: value,
-                          child: new Text(value),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          sex = value;
-                        });
-                      },
-                      hint: sex == null
-                          ? new Text('Male')
-                          : new Text(
-                              sex,
-                              style: new TextStyle(color: Colors.black),
-                            ),
-                      style: new TextStyle(color: Colors.black),
-                    ),
+                          items: <String>['Male', 'Female'].map((String value) {
+                            return new DropdownMenuItem<String>(
+                              value: value,
+                              child: new Text(value),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              sex = value;
+                            });
+                          },
+                          hint: sex == null
+                              ? new Text('Male')
+                              : new Text(
+                                  sex,
+                                  style: new TextStyle(color: Colors.black),
+                                ),
+                          style: new TextStyle(color: Colors.black),
+                        ) ??
+                        (Text(sex, style: underTextStyle)),
                     margin: new EdgeInsets.only(left: 50.0),
                   ),
                 ],
                 crossAxisAlignment: CrossAxisAlignment.start,
+              ),
+              // Update Profile
+              new Container(
+                width: 300.0,
+                child: updateProfileButton(),
+              ) ?? new Container(
+                width: 300.0,
+                child: editProfileButton(),
               )
             ],
           ),
           padding: new EdgeInsets.only(bottom: 20.0),
         ));
   }
+
+  var underTextStyle = TextStyle(
+      color: Colors.black,
+      fontFamily: Util.BemeBold,
+      fontSize: 14.0,
+      decoration: TextDecoration.underline);
 
   var scanTextStyle = TextStyle(
       color: Colors.white, fontFamily: Util.BemeTextRegular, fontSize: 15.5);

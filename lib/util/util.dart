@@ -107,6 +107,8 @@ class Util {
   static const String profile_gender = "Gender";
   static const String profile_gender_male = "Male";
   static const String profile_gender_female ="Female";
+  static const String profile_udpated = "Profile Updated";
+  static const String profile_please_try_again = "Please Try Again";
 
   //error
   static const String unknown = "Unknown error";

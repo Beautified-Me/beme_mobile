@@ -2,7 +2,7 @@
 class AuthUserProfileResponse {
   String message;
   String status;
-  String code;
+  int code;
 
   AuthUserProfileResponse(this.message, this.status, this.code);
 

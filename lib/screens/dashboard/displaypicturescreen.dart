@@ -140,7 +140,11 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
 
   makeUpFilter() {
     return new GestureDetector(
-        onTap: () {},
+        onTap: () {
+          //TODO: 
+        print("whos there");
+        Navigator.pushNamed(context, '/makeupfilter');
+        },
         child: Column(
           children: <Widget>[
             Container(
@@ -161,14 +165,7 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
     return new GestureDetector(
       onTap: () {
         //TODO:
-        print('test');
-        new PhotoFilterSelector(
-          filename: null,
-          filters: presetFiltersList,
-          image: null,
-          loader: Center(child: CircularProgressIndicator()),
-          title: null,
-        );
+      Navigator.pushNamed(context, '/toneFilter');
       },
       child: Column(
         children: <Widget>[
@@ -240,7 +237,7 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
     var auth = AuthService();
     auth.logout();
     logOutFb();
-
+   _removeSharedPreferenceString('seen');
     Navigator.pushReplacementNamed(context, '/login');
   }
 
@@ -372,8 +369,10 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
     return prefs.getString(key);
   }
 
-  Future<bool> _removeSharedPreferenceString(String key) async {
+    Future<bool> _removeSharedPreferenceString(String key) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return await prefs.remove(key);
   }
+
+
 }

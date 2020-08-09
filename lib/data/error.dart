@@ -1,7 +1,7 @@
 class errorResponse {
   String message;
   bool success;
-  bool code; 
+  int code; 
 
   errorResponse(this.message, this.success, this.code);
 
